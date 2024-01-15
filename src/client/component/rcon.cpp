@@ -63,22 +63,20 @@ namespace rcon
 
 		std::string build_status_buffer()
 		{
-			const auto sv_maxclients = game::Dvar_FindVar("sv_maxclients");
-			const auto mapname = game::Dvar_FindVar("mapname");
+			const auto* sv_maxclients = game::Dvar_FindVar("sv_maxclients");
+			const auto* mapname = game::Dvar_FindVar("mapname");
 
 			std::string buffer{};
 			buffer.append(utils::string::va("map: %s\n", mapname->current.string));
-			buffer.append(
-				"num score bot ping guid                             name             address               qport\n");
-			buffer.append(
-				"--- ----- --- ---- -------------------------------- ---------------- --------------------- -----\n");
+			buffer.append("num score bot ping guid                             name             address               qport\n");
+			buffer.append("--- ----- --- ---- -------------------------------- ---------------- --------------------- -----\n");
 
 			for (int i = 0; i < sv_maxclients->current.integer; i++)
 			{
 				const auto client = &game::mp::svs_clients[i];
 
-				char clean_name[32] = { 0 };
-				strncpy_s(clean_name, client->name, sizeof(clean_name));
+				char clean_name[32]{};
+				strncpy_s(clean_name, client->name, _TRUNCATE);
 				game::I_CleanStr(clean_name);
 
 				if (client->header.state >= 1)
@@ -87,11 +85,7 @@ namespace rcon
 						i,
 						game::G_GetClientScore(i),
 						game::SV_BotIsBot(i) ? "Yes" : "No",
-						(client->header.state == 2)
-						? "CNCT"
-						: (client->header.state == 1)
-						? "ZMBI"
-						: utils::string::va("%4i", game::SV_GetClientPing(i)),
+						(client->header.state == 2) ? "CNCT" : (client->header.state == 1) ? "ZMBI" : utils::string::va("%4i", game::SV_GetClientPing(i)),
 						game::SV_GetGuid(i),
 						clean_name,
 						network::net_adr_to_string(client->header.remoteAddress),
@@ -142,8 +136,7 @@ namespace rcon
 					return;
 				}
 
-				auto status_buffer = build_status_buffer();
-				console::info(status_buffer.data());
+				console::info("%s", build_status_buffer().data());
 			});
 
 			if (!game::environment::is_dedi())
