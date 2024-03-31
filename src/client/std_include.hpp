@@ -32,6 +32,8 @@
 #include <iphlpapi.h>
 #include <wincrypt.h>
 
+#define INJECT_HOST_AS_LIB
+
 // min and max is required by gdi, therefore NOMINMAX won't work
 #ifdef max
 #undef max

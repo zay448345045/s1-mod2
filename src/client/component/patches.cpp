@@ -35,6 +35,7 @@ namespace patches
 			{
 				return;
 			}
+
 			return sv_kick_client_num_hook.invoke<void>(client_num, reason);
 		}
 
@@ -100,7 +101,7 @@ namespace patches
 				}
 				else
 				{
-					char command[0x1000] = {0};
+					char command[0x1000]{};
 					game::Dvar_GetCombinedString(command, 1);
 					game::Dvar_SetCommand(args.get(0), command);
 				}
@@ -225,10 +226,6 @@ namespace patches
 			{
 				SetThreadExecutionState(ES_DISPLAY_REQUIRED);
 			}, scheduler::pipeline::main);
-
-			// Allow kbam input when gamepad is enabled
-			utils::hook::nop(SELECT_VALUE(0x14013EF83, 0x140206DB3), 2);
-			utils::hook::nop(SELECT_VALUE(0x14013CBAC, 0x140204710), 6);
 
 			if (game::environment::is_sp())
 			{

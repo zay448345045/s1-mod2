@@ -12,8 +12,8 @@ namespace stats
 {
 	namespace
 	{
-		game::dvar_t* cg_unlock_all_items;
-		game::dvar_t* cg_unlock_all_loot;
+		const game::dvar_t* cg_unlock_all_items;
+		const game::dvar_t* cg_unlock_all_loot;
 
 		utils::hook::detour is_item_locked_hook1;
 		utils::hook::detour is_item_locked_hook2;
@@ -74,17 +74,17 @@ namespace stats
 			}
 			else
 			{
-                // unlock all
-                cg_unlock_all_items = game::Dvar_RegisterBool("cg_unlockall_items", false, game::DVAR_FLAG_SAVED, "Unlock items that are level-locked by the player's stats.");
+				// unlock all
+				cg_unlock_all_items = game::Dvar_RegisterBool("cg_unlockall_items", false, game::DVAR_FLAG_SAVED, "Unlock items that are level-locked by the player's stats.");
 				cg_unlock_all_loot = game::Dvar_RegisterBool("cg_unlockall_loot", false, game::DVAR_FLAG_SAVED, "Unlock supply drop loot.");
-                game::Dvar_RegisterBool("cg_unlockall_classes", false, game::DVAR_FLAG_SAVED, "Unlock extra class slots.");
+				game::Dvar_RegisterBool("cg_unlockall_classes", false, game::DVAR_FLAG_SAVED, "Unlock extra class slots.");
 
-                is_item_locked_hook1.create(0x1403BD790, is_item_locked_stub1); // LiveStorage_IsItemUnlockedFromTable_LocalClient
-                is_item_locked_hook2.create(0x1403BD290, is_item_locked_stub2); // LiveStorage_IsItemUnlockedFromTable
-                is_item_locked_hook3.create(0x1403BAF60, is_loot_locked_stub);  // unlocks supply drop loot
-            }
+				is_item_locked_hook1.create(0x1403BD790, is_item_locked_stub1); // LiveStorage_IsItemUnlockedFromTable_LocalClient
+				is_item_locked_hook2.create(0x1403BD290, is_item_locked_stub2); // LiveStorage_IsItemUnlockedFromTable
+				is_item_locked_hook3.create(0x1403BAF60, is_loot_locked_stub);  // unlocks supply drop loot
+			}
 
-            command::add("setPlayerDataInt", [](const command::params& params)
+			command::add("setPlayerDataInt", [](const command::params& params)
 			{
 				if (params.size() < 2)
 				{

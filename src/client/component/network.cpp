@@ -3,9 +3,9 @@
 #include "game/game.hpp"
 
 #include "command.hpp"
-#include "network.hpp"
 #include "console.hpp"
 #include "dvars.hpp"
+#include "network.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
@@ -273,12 +273,8 @@ namespace network
 				utils::hook::set<int>(0x1403DAD14, max_packet_size);
 				utils::hook::set<int>(0x1403DAD35, max_packet_size);
 
-				// ignore built in "print" oob command and add in our own
+				// ignore built in "print" oob command for security reasons
 				utils::hook::set<std::uint8_t>(0x14020A723, 0xEB);
-				on("print", [](const game::netadr_s&, const std::string& data)
-				{
-					console::info("%s", data.data());
-				});
 			}
 		}
 	};

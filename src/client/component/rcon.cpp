@@ -79,7 +79,7 @@ namespace rcon
 				strncpy_s(clean_name, client->name, _TRUNCATE);
 				game::I_CleanStr(clean_name);
 
-				if (client->header.state >= 1)
+				if (client->header.state > game::CA_DISCONNECTED)
 				{
 					buffer.append(utils::string::va("%3i %5i %3s %s %32s %16s %21s %5i\n",
 						i,
@@ -136,12 +136,13 @@ namespace rcon
 					return;
 				}
 
-				console::info("%s", build_status_buffer().data());
+				const auto status = build_status_buffer();
+				console::info("%s", status.data());
 			});
 
 			if (!game::environment::is_dedi())
 			{
-				command::add("rcon", [&](const command::params& params)
+				command::add("rcon", [](const command::params& params)
 				{
 					static std::string rcon_password{};
 
@@ -178,9 +179,8 @@ namespace rcon
 
 					const auto password = message.substr(0, pos);
 					const auto command = message.substr(pos + 1);
-					const auto rcon_password = game::Dvar_FindVar("rcon_password");
-					if (command.empty() || !rcon_password || !rcon_password->current.string || !strlen(
-						rcon_password->current.string))
+					const auto* rcon_password = game::Dvar_FindVar("rcon_password");
+					if (command.empty() || !rcon_password || !*rcon_password->current.string)
 					{
 						return;
 					}
