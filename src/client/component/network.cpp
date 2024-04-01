@@ -282,7 +282,7 @@ namespace network
 				utils::hook::set<std::uint8_t>(0x14020A723, 0xEB);
 
 				// patch buffer overflow
-				utils::hook::call(0x1403DA8A4, memmove_stub); // NET_GetDeferredClientPacket
+				utils::hook::call(0x1403DA8A4, memmove_stub); // NET_DeferPacketToClient
 			}
 		}
 	};
