@@ -64,7 +64,7 @@ namespace bots
 
 			// SV_BotGetRandomName
 			const auto* const bot_name = game::SV_BotGetRandomName();
-			auto* bot_ent = game::SV_AddBot(bot_name);
+			const auto* bot_ent = game::SV_AddBot(bot_name);
 			if (bot_ent)
 			{
 				spawn_bot(bot_ent->s.number);
@@ -79,22 +79,13 @@ namespace bots
 		volatile bool bot_names_received = false;
 		std::vector<std::string> bot_names;
 
-		const char* get_random_bot_name()
+		bool should_use_remote_bot_names()
 		{
-			if (bot_names.empty())
-			{
-				return get_bot_name_hook.invoke<const char*>();
-			}
-
-			const auto index = std::rand() % bot_names.size();
-			const auto& name = bot_names.at(index);
-
-			return utils::string::va("%.*s", static_cast<int>(name.size()), name.data());
-		}
-
-		bool should_update_bot_names()
-		{
+#ifdef ALLOW_CUSTOM_BOT_NAMES
 			return !filesystem::exists("bots.txt");
+#else
+			return true;
+#endif
 		}
 
 		void parse_bot_names_from_file()
@@ -122,11 +113,30 @@ namespace bots
 			}
 		}
 
+		const char* get_random_bot_name()
+		{
+			if (!bot_names_received && bot_names.empty())
+			{
+				// last attempt to use custom names if they can be found
+				parse_bot_names_from_file();
+			}
+
+			if (bot_names.empty())
+			{
+				return get_bot_name_hook.invoke<const char*>();
+			}
+
+			const auto index = std::rand() % bot_names.size();
+			const auto& name = bot_names.at(index);
+
+			return utils::string::va("%.*s", static_cast<int>(name.size()), name.data());
+		}
+
 		void update_bot_names()
 		{
 			bot_names_received = false;
 
-			game::netadr_s master;
+			game::netadr_s master{};
 			if (server_list::get_master_server(master))
 			{
 				console::info("Getting bots...\n");
@@ -167,7 +177,7 @@ namespace bots
 				}
 			});
 
-			if (should_update_bot_names())
+			if (should_use_remote_bot_names())
 			{
 				scheduler::on_game_initialized([]() -> void
 				{
