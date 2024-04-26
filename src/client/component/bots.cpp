@@ -197,6 +197,7 @@ namespace bots
 				{
 					const std::string received_data{ data };
 					bot_names = utils::string::split(received_data, '\n');
+					console::info("Got %zu names from the master server\n", bot_names.size());
 					bot_names_received = true;
 				}
 			});

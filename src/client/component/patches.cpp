@@ -94,9 +94,9 @@ namespace patches
 			{
 				if (args.size() == 1)
 				{
-					const auto* const current = game::Dvar_ValueToString(dvar, dvar->current);
-					const auto* const reset = game::Dvar_ValueToString(dvar, dvar->reset);
-					console::info("\"%s\" is: \"%s^7\" default: \"%s^7\"\n", dvar->name, current, reset);
+					const std::string current = game::Dvar_ValueToString(dvar, dvar->current);
+					const std::string reset = game::Dvar_ValueToString(dvar, dvar->reset);
+					console::info("\"%s\" is: \"%s^7\" default: \"%s^7\"\n", dvar->name, current.data(), reset.data());
 					console::info("   %s\n", dvars::dvar_get_domain(dvar->type, dvar->domain).data());
 				}
 				else
