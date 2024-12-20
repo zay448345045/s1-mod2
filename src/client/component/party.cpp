@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 #include "game/game.hpp"
+#include "game/dvars.hpp"
 
 #include "party.hpp"
 #include "console.hpp"
@@ -32,6 +33,29 @@ namespace party
 		std::string sv_motd;
 
 		int sv_maxclients;
+
+		utils::info_string get_info()
+		{
+			utils::info_string info;
+
+			info.set("gamename", "S1");
+			info.set("hostname", dvars::get_dvar_string("sv_hostname"));
+			info.set("gametype", dvars::get_dvar_string("g_gametype"));
+			info.set("sv_motd", dvars::get_dvar_string("sv_motd"));
+			info.set("xuid", utils::string::va("%llX", steam::SteamUser()->GetSteamID().bits));
+			info.set("mapname", dvars::get_dvar_string("mapname"));
+			info.set("isPrivate", dvars::get_dvar_string("g_password").empty() ? "0" : "1");
+			info.set("clients", std::to_string(get_client_count()));
+			info.set("bots", std::to_string(get_bot_count()));
+			info.set("sv_maxclients", std::to_string(game::Dvar_FindVar("sv_maxclients")->current.integer));
+			info.set("protocol", std::to_string(PROTOCOL));
+			info.set("shortversion", SHORTVERSION);
+			info.set("playmode", utils::string::va("%i", game::Com_GetCurrentCoDPlayMode()));
+			info.set("sv_running", std::to_string(dvars::get_dvar_bool("sv_running")));
+			info.set("dedicated", std::to_string(dvars::get_dvar_bool("dedicated")));
+
+			return info;
+		}
 
 		void perform_game_initialization()
 		{
@@ -79,30 +103,7 @@ namespace party
 
 			// CL_ConnectFromParty
 			char session_info[0x100] = {};
-			reinterpret_cast<void(*)(int, char*, const game::netadr_s*, const char*, const char*)>(0x140209360)(
-				0, session_info, &target, mapname.data(), gametype.data());
-		}
-
-		std::string get_dvar_string(const std::string& dvar)
-		{
-			const auto* dvar_value = game::Dvar_FindVar(dvar.data());
-			if (dvar_value && dvar_value->current.string)
-			{
-				return {dvar_value->current.string};
-			}
-
-			return {};
-		}
-
-		bool get_dvar_bool(const std::string& dvar)
-		{
-			const auto* dvar_value = game::Dvar_FindVar(dvar.data());
-			if (dvar_value && dvar_value->current.enabled)
-			{
-				return dvar_value->current.enabled;
-			}
-
-			return false;
+			reinterpret_cast<void(*)(int, char*, const game::netadr_s*, const char*, const char*)>(0x140209360)(0, session_info, &target, mapname.data(), gametype.data());
 		}
 
 		void didyouknow_stub(const char* dvar_name, const char* string)
@@ -461,8 +462,7 @@ namespace party
 
 			scheduler::once([]()
 			{
-				game::Dvar_RegisterString("sv_sayName", "console", game::DvarFlags::DVAR_FLAG_NONE,
-				                          "The name to pose as for 'say' commands");
+				game::Dvar_RegisterString("sv_sayName", "console", game::DVAR_FLAG_NONE);
 			}, scheduler::pipeline::main);
 
 			command::add("tell", [](const command::params& params)
@@ -529,25 +529,53 @@ namespace party
 
 			network::on("getInfo", [](const game::netadr_s& target, const std::string& data)
 			{
-				utils::info_string info{};
+				utils::info_string info = get_info();
 				info.set("challenge", data);
-				info.set("gamename", "S1");
-				info.set("hostname", get_dvar_string("sv_hostname"));
-				info.set("gametype", get_dvar_string("g_gametype"));
-				info.set("sv_motd", get_dvar_string("sv_motd"));
-				info.set("xuid", utils::string::va("%llX", steam::SteamUser()->GetSteamID().bits));
-				info.set("mapname", get_dvar_string("mapname"));
-				info.set("isPrivate", get_dvar_string("g_password").empty() ? "0" : "1");
-				info.set("clients", std::to_string(get_client_count()));
-				info.set("bots", std::to_string(get_bot_count()));
-				info.set("sv_maxclients", std::to_string(*game::mp::svs_numclients));
-				info.set("protocol", std::to_string(PROTOCOL));
-				info.set("playmode", utils::string::va("%i", game::Com_GetCurrentCoDPlayMode()));
-				info.set("sv_running", std::to_string(get_dvar_bool("sv_running")));
-				info.set("dedicated", std::to_string(get_dvar_bool("dedicated")));
-				info.set("shortversion", SHORTVERSION);
 
 				network::send(target, "infoResponse", info.build(), '\n');
+			});
+
+			network::on("getStatus", [](const game::netadr_s& target, const std::string& data)
+			{
+				std::string player_list;
+
+				utils::info_string info = get_info();
+				info.set("challenge", data);
+
+				const auto* sv_running = game::Dvar_FindVar("sv_running");
+				if (!sv_running || !sv_running->current.enabled)
+				{
+					return;
+				}
+
+				for (auto i = 0; i < game::Dvar_FindVar("sv_maxclients")->current.integer; ++i)
+				{
+					auto* client = &game::mp::svs_clients[i];
+					auto* self = &game::mp::g_entities[i];
+
+					if (client->header.state < 5)
+					{
+						continue;
+					}
+
+					if (!self || !self->client)
+					{
+						continue;
+					}
+
+					if (game::SV_BotIsBot(i))
+					{
+						continue;
+					}
+
+					const auto score = game::G_GetClientScore(i);
+					const auto ping = game::SV_GetClientPing(i);
+					const std::string name = game::mp::svs_clients[i].name;
+
+					player_list.append(std::format("{} {} \"{}\"\n", score, ping, name));
+				}
+
+				network::send(target, "statusResponse", info.build() + "\n"s + player_list + "\n"s, '\n');
 			});
 
 			if (game::environment::is_dedi())

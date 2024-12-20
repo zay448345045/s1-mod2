@@ -58,28 +58,28 @@ namespace patches
 			if (game::environment::is_mp())
 			{
 				// Make name save
-				game::Dvar_RegisterString("name", get_login_username().data(), game::DVAR_FLAG_SAVED, "Player name.");
+				game::Dvar_RegisterString("name", get_login_username().data(), game::DVAR_FLAG_SAVED);
 
 				// Disable data validation error popup
-				game::Dvar_RegisterInt("data_validation_allow_drop", 0, 0, 0, game::DVAR_FLAG_NONE, "");
+				game::Dvar_RegisterInt("data_validation_allow_drop", 0, 0, 0, game::DVAR_FLAG_NONE);
 			}
 
 			return com_register_dvars_hook.invoke<void>();
 		}
 
-		game::dvar_t* register_com_maxfps_stub(const char* name, int /*value*/, int /*min*/, int /*max*/, const unsigned int /*flags*/, const char* description)
+		game::dvar_t* register_com_maxfps_stub(const char* name, int /*value*/, int /*min*/, int /*max*/, const unsigned int /*flags*/)
 		{
-			return game::Dvar_RegisterInt(name, 0, 0, 1000, game::DVAR_FLAG_SAVED, description);
+			return game::Dvar_RegisterInt(name, 0, 0, 1000, game::DVAR_FLAG_SAVED);
 		}
 
-		game::dvar_t* register_cg_fov_stub(const char* name, float value, float min, float /*max*/, const unsigned int /*flags*/, const char* description)
+		game::dvar_t* register_cg_fov_stub(const char* name, float value, float min, float /*max*/, const unsigned int /*flags*/)
 		{
-			return game::Dvar_RegisterFloat(name, value, min, 160, game::DVAR_FLAG_SAVED, description);
+			return game::Dvar_RegisterFloat(name, value, min, 160, game::DVAR_FLAG_SAVED);
 		}
 
-		game::dvar_t* register_fovscale_stub(const char* name, float /*value*/, float /*min*/, float /*max*/, unsigned int /*flags*/, const char* desc)
+		game::dvar_t* register_fovscale_stub(const char* name, float /*value*/, float /*min*/, float /*max*/, unsigned int /*flags*/)
 		{
-			return game::Dvar_RegisterFloat(name, 1.0f, 0.2f, 5.0f, game::DVAR_FLAG_SAVED, desc);
+			return game::Dvar_RegisterFloat(name, 1.0f, 0.2f, 5.0f, game::DVAR_FLAG_SAVED);
 		}
 
 		int dvar_command_patch() // game makes this return an int and compares with eax instead of al -_-
@@ -252,7 +252,7 @@ namespace patches
 			utils::hook::call(0x14026E63B, bsp_sys_error_stub);
 
 			// client side aim assist dvar
-			dvars::aimassist_enabled = game::Dvar_RegisterBool("aimassist_enabled", true, game::DVAR_FLAG_SAVED, "Enables aim assist for controllers");
+			dvars::aimassist_enabled = game::Dvar_RegisterBool("aimassist_enabled", true, game::DVAR_FLAG_SAVED);
 			utils::hook::call(0x140003609, aim_assist_add_to_target_list);
 
 			// isProfanity
@@ -304,7 +304,7 @@ namespace patches
 			dvars::override::register_int("cl_connectTimeout", 120, 120, 1800, game::DVAR_FLAG_NONE); // Seems unused
 			dvars::override::register_int("sv_connectTimeout", 120, 120, 1800, game::DVAR_FLAG_NONE); // 60 - 0 - 1800
 
-			game::Dvar_RegisterInt("scr_game_spectatetype", 1, 0, 99, game::DVAR_FLAG_REPLICATED, "");
+			game::Dvar_RegisterInt("scr_game_spectatetype", 1, 0, 99, game::DVAR_FLAG_REPLICATED);
 
 			// Prevent clients from ending the game as non host by sending 'end_game' lui notification
 			cmd_lui_notify_server_hook.create(0x1402E9390, cmd_lui_notify_server_stub);

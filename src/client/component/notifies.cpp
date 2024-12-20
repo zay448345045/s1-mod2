@@ -28,8 +28,6 @@ namespace notifies
 		char empty_function[2] = {0x32, 0x34}; // CHECK_CLEAR_PARAMS, END
 		const char* target_function = nullptr;
 
-		
-
 		void client_command_stub(const int client_num)
 		{
 			if (game::mp::g_entities[client_num].client == nullptr)
@@ -137,7 +135,7 @@ namespace notifies
 			a.lea(eax, dword_ptr(r15, -0x17));
 			a.mov(dword_ptr(rbp, 0x68), r15d);
 
-			a.jmp(0x1403FA143);
+			a.jmp(SELECT_VALUE(0x14031D9E3, 0x1403FA143));
 
 			a.bind(replace);
 
@@ -185,22 +183,22 @@ namespace notifies
 	public:
 		void post_unpack() override
 		{
+			utils::hook::jump(SELECT_VALUE(0x14031D9D4, 0x1403FA134), utils::hook::assemble(vm_execute_stub), true);
+
+			scripting::on_shutdown([](const int clear_scripts) -> void
+			{
+				if (clear_scripts)
+				{
+					vm_execute_hooks.clear();
+				}
+			});
+
 			if (game::environment::is_sp())
 			{
 				return;
 			}
 
 			utils::hook::call(0x14043A9AD, client_command_stub);
-
-			utils::hook::jump(0x1403FA134, utils::hook::assemble(vm_execute_stub), true);
-
-			scripting::on_shutdown([](bool free_scripts)
-			{
-				if (free_scripts)
-				{
-					vm_execute_hooks.clear();
-				}
-			});
 		}
 	};
 }

@@ -164,7 +164,7 @@ namespace logger
 
 			com_error_hook.create(game::Com_Error, com_error_stub);
 
-			logger_dev = game::Dvar_RegisterBool("logger_dev", false, game::DVAR_FLAG_SAVED, "Print dev stuff");
+			logger_dev = game::Dvar_RegisterBool("logger_dev", false, game::DVAR_FLAG_SAVED);
 		}
 	};
 }

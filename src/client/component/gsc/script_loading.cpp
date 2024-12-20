@@ -12,6 +12,7 @@
 #include "component/console.hpp"
 #include "component/scripting.hpp"
 
+#include "script_extension.hpp"
 #include "script_loading.hpp"
 
 namespace gsc
@@ -32,6 +33,7 @@ namespace gsc
 			init_handles.clear();
 			loaded_scripts.clear();
 			script_allocator.clear();
+			clear_devmap();
 		}
 
 		bool read_raw_script_file(const std::string& name, std::string* data)
@@ -115,6 +117,12 @@ namespace gsc
 
 				loaded_scripts[real_name] = script_file_ptr;
 
+				const auto devmap = std::get<2>(output_script);
+				if (devmap.size > 0 && (gsc_ctx->build() & xsk::gsc::build::dev_maps) != xsk::gsc::build::prod)
+				{
+					add_devmap_entry(script_file_ptr->bytecode, byte_code_size, real_name, devmap);
+				}
+
 				return script_file_ptr;
 			}
 			catch (const std::exception& ex)
@@ -181,13 +189,10 @@ namespace gsc
 			}
 		}
 
-		void load_scripts(const std::filesystem::path& root_dir)
+
+		void load_scripts_from_folder(const std::filesystem::path& root_dir, const std::filesystem::path& script_dir)
 		{
-			const std::filesystem::path script_dir = root_dir / "scripts";
-			if (!utils::io::directory_exists(script_dir.generic_string()))
-			{
-				return;
-			}
+			console::info("Scanning directory '%s' for custom GSC scripts...\n", script_dir.generic_string().data());
 
 			const auto scripts = utils::io::list_files(script_dir.generic_string());
 			for (const auto& script : scripts)
@@ -202,6 +207,44 @@ namespace gsc
 				const auto base_name = relative.substr(0, relative.size() - 4);
 
 				load_script(base_name);
+			}
+		}
+
+		void load_scripts(const std::filesystem::path& root_dir)
+		{
+			const auto load = [&root_dir](const std::filesystem::path& folder) -> void
+			{
+				const std::filesystem::path script_dir = root_dir / folder;
+				if (utils::io::directory_exists(script_dir.generic_string()))
+				{
+					load_scripts_from_folder(root_dir, script_dir);
+				}
+			};
+
+			const std::filesystem::path base_dir = "scripts";
+
+			load(base_dir);
+
+			const auto* map_name = game::Dvar_FindVar("mapname");
+
+			if (game::environment::is_sp())
+			{
+				const std::filesystem::path game_folder = "sp";
+
+				load(base_dir / game_folder);
+
+				load(base_dir / game_folder / map_name->current.string);
+			}
+			else
+			{
+				const std::filesystem::path game_folder = "mp";
+
+				load(base_dir / game_folder);
+
+				load(base_dir / game_folder / map_name->current.string);
+
+				const auto* game_type = game::Dvar_FindVar("g_gametype");
+				load(base_dir / game_folder / game_type->current.string);
 			}
 		}
 
@@ -223,8 +266,6 @@ namespace gsc
 			{
 				return;
 			}
-
-			clear();
 
 			for (const auto& path : filesystem::get_search_paths())
 			{
@@ -259,7 +300,38 @@ namespace gsc
 			utils::hook::invoke<void>(0x1403380D0);
 		}
 
-		void scr_load_level_stub()
+		int g_scr_set_level_script_stub(game::ScriptFunctions* functions)
+		{
+			const auto result = utils::hook::invoke<int>(0x140262F60, functions);
+
+			for (const auto& path : filesystem::get_search_paths())
+			{
+				load_scripts(path);
+			}
+
+			return result;
+		}
+
+		void scr_load_level_singleplayer_stub()
+		{
+			for (auto& function_handle : main_handles)
+			{
+				console::info("Executing '%s::main'\n", function_handle.first.data());
+				const auto thread = game::Scr_ExecThread(static_cast<int>(function_handle.second), 0);
+				game::RemoveRefToObject(thread);
+			}
+
+			utils::hook::invoke<void>(0x140257720);
+
+			for (auto& function_handle : init_handles)
+			{
+				console::info("Executing '%s::init'\n", function_handle.first.data());
+				const auto thread = game::Scr_ExecThread(static_cast<int>(function_handle.second), 0);
+				game::RemoveRefToObject(thread);
+			}
+		}
+
+		void scr_load_level_multiplayer_stub()
 		{
 			utils::hook::invoke<void>(0x140325B90);
 
@@ -358,28 +430,32 @@ namespace gsc
 			utils::hook::call(SELECT_VALUE(0x1403309E9, 0x1403309E9), scr_begin_load_scripts_stub); // GScr_LoadScripts
 			utils::hook::call(SELECT_VALUE(0x14023DA84, 0x140330B9C), scr_end_load_scripts_stub); // GScr_LoadScripts
 
-			dvars::com_developer = game::Dvar_RegisterInt("developer", 0, 0, 2, game::DVAR_FLAG_NONE, "Enable development options");
-			dvars::com_developer_script = game::Dvar_RegisterBool("developer_script", false, game::DVAR_FLAG_NONE, "Enable developer script comments");
+			// ProcessScript
+			utils::hook::call(SELECT_VALUE(0x14031AB47, 0x1403F7317), find_script);
+			utils::hook::call(SELECT_VALUE(0x14031AB57, 0x1403F7327), db_is_x_asset_default);
+
+			dvars::com_developer = game::Dvar_RegisterInt("developer", 0, 0, 2, game::DVAR_FLAG_NONE);
+			dvars::com_developer_script = game::Dvar_RegisterBool("developer_script", false, game::DVAR_FLAG_NONE);
 
 			if (game::environment::is_sp())
 			{
-				return;
+				utils::hook::call(0x1402632A5, g_scr_set_level_script_stub);
+
+				utils::hook::call(0x140226931, scr_load_level_singleplayer_stub);
+			}
+			else
+			{
+				// GScr_LoadScripts
+				utils::hook::call(0x140330B97, gscr_post_load_scripts_stub);
+
+				// Exec script handles
+				utils::hook::call(0x1402F71AE, g_load_structs_stub);
+				utils::hook::call(0x1402F71C7, scr_load_level_multiplayer_stub);
 			}
 
-			// ProcessScript
-			utils::hook::call(0x1403F7317, find_script);
-			utils::hook::call(0x1403F7327, db_is_x_asset_default);
-
-			// GScr_LoadScripts
-			utils::hook::call(0x140330B97, gscr_post_load_scripts_stub);
-
-			// Exec script handles
-			utils::hook::call(0x1402F71AE, g_load_structs_stub);
-			utils::hook::call(0x1402F71C7, scr_load_level_stub);
-
-			scripting::on_shutdown([](int free_scripts)
+			scripting::on_shutdown([](const int clear_scripts) -> void
 			{
-				if (free_scripts)
+				if (clear_scripts)
 				{
 					clear();
 				}

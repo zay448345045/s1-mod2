@@ -209,7 +209,7 @@ namespace dvars
 	utils::hook::detour dvar_set_int_hook;
 	utils::hook::detour dvar_set_string_hook;
 
-	game::dvar_t* dvar_register_bool_stub(const char* name, bool value, unsigned int flags, const char* description)
+	game::dvar_t* dvar_register_bool_stub(const char* name, bool value, unsigned int flags)
 	{
 		auto* var = find_dvar(override::register_bool_overrides, name);
 		if (var)
@@ -218,11 +218,10 @@ namespace dvars
 			flags = var->flags;
 		}
 
-		return dvar_register_bool_hook.invoke<game::dvar_t*>(name, value, flags, description);
+		return dvar_register_bool_hook.invoke<game::dvar_t*>(name, value, flags);
 	}
 
-	game::dvar_t* dvar_register_float_stub(const char* name, float value, float min, float max, unsigned int flags,
-	                                  const char* description)
+	game::dvar_t* dvar_register_float_stub(const char* name, float value, float min, float max, unsigned int flags)
 	{
 		auto* var = find_dvar(override::register_float_overrides, name);
 		if (var)
@@ -233,11 +232,10 @@ namespace dvars
 			flags = var->flags;
 		}
 
-		return dvar_register_float_hook.invoke<game::dvar_t*>(name, value, min, max, flags, description);
+		return dvar_register_float_hook.invoke<game::dvar_t*>(name, value, min, max, flags);
 	}
 
-	game::dvar_t* dvar_register_int_stub(const char* name, int value, int min, int max, unsigned int flags,
-	                                const char* description)
+	game::dvar_t* dvar_register_int_stub(const char* name, int value, int min, int max, unsigned int flags)
 	{
 		auto* var = find_dvar(override::register_int_overrides, name);
 		if (var)
@@ -248,10 +246,10 @@ namespace dvars
 			flags = var->flags;
 		}
 
-		return dvar_register_int_hook.invoke<game::dvar_t*>(name, value, min, max, flags, description);
+		return dvar_register_int_hook.invoke<game::dvar_t*>(name, value, min, max, flags);
 	}
 
-	game::dvar_t* dvar_register_string_stub(const char* name, const char* value, unsigned int flags, const char* description)
+	game::dvar_t* dvar_register_string_stub(const char* name, const char* value, unsigned int flags)
 	{
 		auto* var = find_dvar(override::register_string_overrides, name);
 		if (var)
@@ -260,11 +258,10 @@ namespace dvars
 			flags = var->flags;
 		}
 
-		return dvar_register_string_hook.invoke<game::dvar_t*>(name, value, flags, description);
+		return dvar_register_string_hook.invoke<game::dvar_t*>(name, value, flags);
 	}
 
-	game::dvar_t* dvar_register_vector2_stub(const char* name, float x, float y, float min, float max,
-		                                unsigned int flags, const char* description)
+	game::dvar_t* dvar_register_vector2_stub(const char* name, float x, float y, float min, float max, unsigned int flags)
 	{
 		auto* var = find_dvar(override::register_vector2_overrides, name);
 		if (var)
@@ -276,11 +273,10 @@ namespace dvars
 			flags = var->flags;
 		}
 
-		return dvar_register_vector2_hook.invoke<game::dvar_t*>(name, x, y, min, max, flags, description);
+		return dvar_register_vector2_hook.invoke<game::dvar_t*>(name, x, y, min, max, flags);
 	}
 
-	game::dvar_t* dvar_register_vector3_stub(const char* name, float x, float y, float z, float min,
-		                                float max, unsigned int flags, const char* description)
+	game::dvar_t* dvar_register_vector3_stub(const char* name, float x, float y, float z, float min, float max, unsigned int flags)
 	{
 		auto* var = find_dvar(override::register_vector3_overrides, name);
 		if (var)
@@ -293,7 +289,7 @@ namespace dvars
 			flags = var->flags;
 		}
 
-		return dvar_register_vector3_hook.invoke<game::dvar_t*>(name, x, y, z, min, max, flags, description);
+		return dvar_register_vector3_hook.invoke<game::dvar_t*>(name, x, y, z, min, max, flags);
 	}
 
 	void dvar_set_bool_stub(game::dvar_t* dvar, bool boolean)

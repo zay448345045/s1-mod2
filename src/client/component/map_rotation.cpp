@@ -289,11 +289,11 @@ namespace map_rotation
 
 			scheduler::once([]
 			{
-				sv_map_rotation = game::Dvar_RegisterString("sv_mapRotation", "", game::DVAR_FLAG_NONE, "");
-				sv_map_rotation_current = game::Dvar_RegisterString("sv_mapRotationCurrent", "", game::DVAR_FLAG_NONE, "");
+				sv_map_rotation = game::Dvar_RegisterString("sv_mapRotation", "", game::DVAR_FLAG_NONE);
+				sv_map_rotation_current = game::Dvar_RegisterString("sv_mapRotationCurrent", "", game::DVAR_FLAG_NONE);
 			}, scheduler::pipeline::main);
 
-			sv_random_map_rotation = game::Dvar_RegisterBool("sv_randomMapRotation", false, game::DVAR_FLAG_NONE, "Randomize map rotation");
+			sv_random_map_rotation = game::Dvar_RegisterBool("sv_randomMapRotation", false, game::DVAR_FLAG_NONE);
 
 			command::add("map_rotate", &perform_map_rotation);
 

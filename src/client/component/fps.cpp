@@ -137,9 +137,9 @@ namespace fps
 			}
 		}
 
-		const game::dvar_t* cg_draw_fps_register_stub(const char* dvar_name, const char** value_list, const int default_index, unsigned int /*flags*/, const char* description)
+		const game::dvar_t* cg_draw_fps_register_stub(const char* dvar_name, const char** value_list, const int default_index, unsigned int /*flags*/)
 		{
-			cg_drawFPS = game::Dvar_RegisterEnum(dvar_name, value_list, default_index, game::DVAR_FLAG_SAVED, description);
+			cg_drawFPS = game::Dvar_RegisterEnum(dvar_name, value_list, default_index, game::DVAR_FLAG_SAVED);
 			return cg_drawFPS;
 		}
 	}
@@ -173,12 +173,12 @@ namespace fps
 			scheduler::loop(cg_draw_fps, scheduler::pipeline::renderer);
 			if (game::environment::is_mp())
 			{
-				cg_drawPing = game::Dvar_RegisterInt("cg_drawPing", 0, 0, 1, game::DVAR_FLAG_SAVED, "Draw ping");
+				cg_drawPing = game::Dvar_RegisterInt("cg_drawPing", 0, 0, 1, game::DVAR_FLAG_SAVED);
 				scheduler::loop(cg_draw_ping, scheduler::pipeline::renderer);
 			}
 
-			game::Dvar_RegisterBool("cg_infobar_ping", false, game::DVAR_FLAG_SAVED, "Show server latency");
-			game::Dvar_RegisterBool("cg_infobar_fps", false, game::DVAR_FLAG_SAVED, "Show FPS counter");
+			game::Dvar_RegisterBool("cg_infobar_ping", false, game::DVAR_FLAG_SAVED);
+			game::Dvar_RegisterBool("cg_infobar_fps", false, game::DVAR_FLAG_SAVED);
 		}
 	};
 }

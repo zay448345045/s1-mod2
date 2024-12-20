@@ -31,7 +31,7 @@ namespace ranked
 				dvars::override::register_bool("xblive_privatematch", false, game::DVAR_FLAG_REPLICATED | game::DVAR_FLAG_WRITE);
 
 				// Some dvar used in gsc
-				game::Dvar_RegisterBool("force_ranking", true, game::DVAR_FLAG_WRITE, "Force ranking");
+				game::Dvar_RegisterBool("force_ranking", true, game::DVAR_FLAG_WRITE);
 			}
 
 			// Always run bots, even if xblive_privatematch is 0

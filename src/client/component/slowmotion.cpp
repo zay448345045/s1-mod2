@@ -2,6 +2,9 @@
 #include "loader/component_loader.hpp"
 #include "game/game.hpp"
 
+#include "command.hpp"
+#include "console.hpp"
+
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
 
@@ -33,6 +36,25 @@ namespace slowmotion
 			game::SV_SetConfigstring(10, utils::string::va("%i %i %g %g", *game::mp::gameTime, duration, start, end));
 			game::Com_SetSlowMotion(start, end, duration);
 		}
+
+		void set_code_time_scale(float timescale)
+		{
+			assert(timescale > 0.0f);
+			*game::com_codeTimeScale = timescale;
+		}
+
+		void com_timescale_f(const command::params& params)
+		{
+			if (params.size() != 2)
+			{
+				console::info("timescale <rate>\n");
+				return;
+			}
+
+			const auto timescale = static_cast<float>(std::atof(params.get(1)));
+			console::info("timescale set to %f\n", timescale);
+			set_code_time_scale(timescale);
+		}
 	}
 
 	class component final : public component_interface
@@ -40,6 +62,13 @@ namespace slowmotion
 	public:
 		void post_unpack() override
 		{
+			if (game::environment::is_sp())
+			{
+				return;
+			}
+
+			command::add("timescale", com_timescale_f);
+
 			if (!game::environment::is_dedi())
 			{
 				return;

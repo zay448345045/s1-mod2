@@ -177,9 +177,9 @@ namespace dedicated
 				return;
 			}
 
-			game::Dvar_RegisterBool("dedicated", true, game::DVAR_FLAG_READ, "Dedicated server");
+			game::Dvar_RegisterBool("dedicated", true, game::DVAR_FLAG_READ);
 
-			sv_lanOnly = game::Dvar_RegisterBool("sv_lanOnly", false, game::DVAR_FLAG_NONE, "Don't send heartbeat");
+			sv_lanOnly = game::Dvar_RegisterBool("sv_lanOnly", false, game::DVAR_FLAG_NONE);
 
 			// Disable VirtualLobby
 			dvars::override::register_bool("virtualLobbyEnabled", false, game::DVAR_FLAG_NONE | game::DVAR_FLAG_READ);

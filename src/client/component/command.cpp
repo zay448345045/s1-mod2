@@ -253,7 +253,10 @@ namespace command
 
 	void execute(std::string command, const bool sync)
 	{
-		command += "\n";
+		if (!command.ends_with('\n'))
+		{
+			command += "\n";
+		}
 
 		if (sync)
 		{

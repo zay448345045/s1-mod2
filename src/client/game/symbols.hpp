@@ -12,7 +12,7 @@ namespace game
 	WEAK symbol<void(unsigned int id)> AddRefToObject{0, 0x1403F1F10};
 	WEAK symbol<unsigned int(unsigned int id)> AllocThread{0, 0x1403F2270};
 	WEAK symbol<void(int type, VariableUnion u)> RemoveRefToValue{0x140317340, 0x1403F3A50};
-	WEAK symbol<void(unsigned int id)> RemoveRefToObject{0, 0x1403F3940};
+	WEAK symbol<void(unsigned int id)> RemoveRefToObject{0x140317230, 0x1403F3940};
 
 	WEAK symbol<void(void*, void*)> AimAssist_AddToTargetList{0, 0x140001730};
 
@@ -70,22 +70,14 @@ namespace game
 	WEAK symbol<void(const char*, const char*, DvarSetSource)> Dvar_SetFromStringByNameFromSource{0x1403737D0, 0x1404C2E40};
 	WEAK symbol<const char*(dvar_t* dvar, dvar_value value)> Dvar_ValueToString{0x140374E10, 0x1404C47B0};
 
-	WEAK symbol<dvar_t*(const char* dvarName, bool value, unsigned int flags, const char* description)>
-	Dvar_RegisterBool{0x140371850, 0x1404C0BE0};
-	WEAK symbol<dvar_t*(const char* dvarName, const char** valueList, int defaultIndex, unsigned int flags,
-	                    const char* description)> Dvar_RegisterEnum{0x140371B30, 0x1404C0EC0};
-	WEAK symbol<dvar_t*(const char* dvarName, float value, float min, float max, unsigned int flags,
-	                    const char* description)> Dvar_RegisterFloat{0x140371C20, 0x1404C0FB0};
-	WEAK symbol<dvar_t*(const char* dvarName, int value, int min, int max, unsigned int flags, const char* desc)>
-	Dvar_RegisterInt{0x140371CF0, 0x1404C1080};
-	WEAK symbol<dvar_t*(const char* dvarName, const char* value, unsigned int flags, const char* description)>
-	Dvar_RegisterString{0x140372050, 0x1404C1450};
-	WEAK symbol<dvar_t* (const char* dvarName, float x, float y, float min, float max,
-		                 unsigned int flags, const char* description)> Dvar_RegisterVec2{0x140372120, 0x1404C1520};
-	WEAK symbol<dvar_t* (const char* dvarName, float x, float y, float z, float min, float max,
-		                 unsigned int flags, const char* description)> Dvar_RegisterVec3{0x140372230, 0x1404C1600};
-	WEAK symbol<dvar_t*(const char* dvarName, float x, float y, float z, float w, float min, float max,
-	                    unsigned int flags, const char* description)> Dvar_RegisterVec4{0x140372430, 0x1404C1800};
+	WEAK symbol<dvar_t*(const char* dvarName, bool value, unsigned int flags)> Dvar_RegisterBool{0x140371850, 0x1404C0BE0};
+	WEAK symbol<dvar_t*(const char* dvarName, const char** valueList, int defaultIndex, unsigned int flags)> Dvar_RegisterEnum{0x140371B30, 0x1404C0EC0};
+	WEAK symbol<dvar_t*(const char* dvarName, float value, float min, float max, unsigned int flags)> Dvar_RegisterFloat{0x140371C20, 0x1404C0FB0};
+	WEAK symbol<dvar_t*(const char* dvarName, int value, int min, int max, unsigned int flags)> Dvar_RegisterInt{0x140371CF0, 0x1404C1080};
+	WEAK symbol<dvar_t*(const char* dvarName, const char* value, unsigned int flags)> Dvar_RegisterString{0x140372050, 0x1404C1450};
+	WEAK symbol<dvar_t*(const char* dvarName, float x, float y, float min, float max, unsigned int flags)> Dvar_RegisterVec2{0x140372120, 0x1404C1520};
+	WEAK symbol<dvar_t*(const char* dvarName, float x, float y, float z, float min, float max, unsigned int flags)> Dvar_RegisterVec3{0x140372230, 0x1404C1600};
+	WEAK symbol<dvar_t*(const char* dvarName, float x, float y, float z, float w, float min, float max, unsigned int flags)> Dvar_RegisterVec4{0x140372430, 0x1404C1800};
 
 	WEAK symbol<DWOnlineStatus()> dwGetLogOnStatus{0, 0x14053CCB0};
 
@@ -96,7 +88,7 @@ namespace game
 	WEAK symbol<void (const char *path, const char *dir)> FS_AddLocalizedGameDirectory{0x14035F5C0, 0x1404AD170};
 
 	WEAK symbol<void()> GScr_LoadConsts{0x140283970, 0x1403479C0};
-	WEAK symbol<unsigned int(unsigned int parentId, unsigned int name)> FindVariable{0x1403165D0, 0x1403F2DC0};
+	WEAK symbol<unsigned int(unsigned int parentId, unsigned int name)> FindVariable{0x1403166D0, 0x1403F2DC0};
 	WEAK symbol<unsigned int(int entnum, unsigned int classnum)> FindEntityId{0x1403166D0, 0x1403F2CC0};
 	WEAK symbol<scr_string_t(unsigned int parentId, unsigned int id)> GetVariableName{0x1403170E0, 0x1403F37F0};
 	WEAK symbol<void(VariableValue* result, unsigned int classnum, int entnum, int offset)> GetEntityFieldValue{0x14031AAD0, 0x1403F72A0};
@@ -152,21 +144,23 @@ namespace game
 	WEAK symbol<void(int value)> Scr_AddInt{0x0, 0x1403F7B30};
 	WEAK symbol<int(unsigned int index)> Scr_GetInt{0x14031C1F0, 0x1403F88D0};
 	WEAK symbol<float(unsigned int index)> Scr_GetFloat{0x14031C090, 0x1403F8820};
+	WEAK symbol<void(unsigned int index, float* vectorValue)> Scr_GetVector{0x14031C7E0, 0x1403F8EC0};
 	WEAK symbol<unsigned int()> Scr_GetNumParam{0x14031C2A0, 0x1403F8980};
 	WEAK symbol<void()> Scr_ClearOutParams{0x14031B7C0, 0x1403F8040};
 	WEAK symbol<scr_entref_t(unsigned int entId)> Scr_GetEntityIdRef{0x14031A0D0, 0x1403F68A0};
 	WEAK symbol<int(unsigned int classnum, int entnum, int offset)> Scr_SetObjectField{0x14026B620, 0x140339450};
 	WEAK symbol<void(void* ent, unsigned int stringValue, unsigned int paramcount)> Scr_Notify{0x0, 0x140339120};
 	WEAK symbol<void(unsigned int id, unsigned int stringValue, unsigned int paramcount)> Scr_NotifyId{0x14031CB80, 0x1403F92D0};
-	WEAK symbol<bool(VariableValue* value)> Scr_CastString{0x0, 0x1403F4500};
+	WEAK symbol<bool(VariableValue* value)> Scr_CastString{0x140317EA0, 0x1403F4500};
 
-	WEAK symbol<unsigned __int16(int handle, unsigned int paramcount)> Scr_ExecThread{0x0, 0x1403F8120};
-	WEAK symbol<unsigned int(const char* name)> Scr_LoadScript{0x0, 0x1403EE250};
-	WEAK symbol<unsigned int(const char* script, unsigned int name)> Scr_GetFunctionHandle{0x0, 0x1403EE0D0};
+	WEAK symbol<unsigned __int16(int handle, unsigned int paramcount)> Scr_ExecThread{0x14031B8C0, 0x1403F8120};
+	WEAK symbol<unsigned int(const char* name)> Scr_LoadScript{0x140311CD0, 0x1403EE250};
+	WEAK symbol<unsigned int(const char* filename, unsigned int name)> Scr_GetFunctionHandle{0x140311B50, 0x1403EE0D0};
 	WEAK symbol<unsigned int(void* func, int type, unsigned int name)> Scr_RegisterFunction{0x1403115B0, 0x1403EDAE0};
+	WEAK symbol<unsigned int(const char** pName, int* type)> Scr_GetFunction{0x140263E90, 0x1403318B0};
 
 	WEAK symbol<unsigned int(unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x0, 0x1403F9E40};
-	WEAK symbol<void()> Scr_ErrorInternal{0x0, 0x1403F80A0};
+	WEAK symbol<void()> Scr_ErrorInternal{0x14031B840, 0x1403F80A0};
 
 	WEAK symbol<const char*(scr_string_t stringValue)> SL_ConvertToString{0x140314850, 0x1403F0F10};
 	WEAK symbol<scr_string_t(const char* str)> SL_FindString{0x140314AF0, 0x1403F11C0};
@@ -202,8 +196,7 @@ namespace game
 
 	WEAK symbol<void(int index, const char* string)> SV_SetConfigstring{0, 0x14043FCA0};
 
-	WEAK symbol<void(char* path, int pathSize, Sys_Folder folder, const char* filename, const char* ext)>
-	Sys_BuildAbsPath{0x14037BBE0, 0x1404CC7E0};
+	WEAK symbol<void(char* path, int pathSize, Sys_Folder folder, const char* filename, const char* ext)> Sys_BuildAbsPath{0x14037BBE0, 0x1404CC7E0};
 	WEAK symbol<HANDLE(int folder, const char* baseFileName)> Sys_CreateFile{0x14037BCA0, 0x1404CC8A0};
 	WEAK symbol<void(const char* error, ...)> Sys_Error{0x14038C770, 0x1404D6260};
 	WEAK symbol<bool(const char* path)> Sys_FileExists{0x14038C810, 0x1404D6310};
@@ -223,6 +216,8 @@ namespace game
 
 	WEAK symbol<void*(unsigned int size, unsigned int alignment, unsigned int type, int source)> PMem_AllocFromSource_NoDebug{0x1403775F0, 0x1404C7BA0};
 	WEAK symbol<void*(unsigned int size)> Hunk_AllocateTempMemoryHighInternal{0x140369D60, 0x1404B68B0};
+
+	WEAK symbol<void(unsigned __int64 markPos)> LargeLocalResetToMark{0x140369C40, 0x1404B6790};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x14059C5C0, 0x1406FD930};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x14059CD00, 0x1406FE070};
@@ -245,6 +240,8 @@ namespace game
 	WEAK symbol<int> g_script_error_level{0x14A1917A8, 0x1487F9FA4};
 	WEAK symbol<jmp_buf> g_script_error{0x14A1917B0, 0x1487FA0C0};
 	WEAK symbol<scr_classStruct_t> g_classMap{0x14080A840, 0x1409BE1B0};
+
+	WEAK symbol<float> com_codeTimeScale{0x0, 0x147B754EC};
 
 	WEAK symbol<scrVarGlob_t> scr_VarGlob{0x149B1D680, 0x148185F80};
 	WEAK symbol<scrVmPub_t> scr_VmPub{0x14A1938C0, 0x1487FC1C0};

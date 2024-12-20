@@ -186,100 +186,6 @@ namespace gsc
 				}
 			}
 		}
-
-		void scr_get_vector(unsigned int index, float* vector_value)
-		{
-			if (index < game::scr_VmPub->outparamcount)
-			{
-				auto* value = game::scr_VmPub->top - index;
-				if (value->type == game::VAR_VECTOR)
-				{
-					std::memcpy(vector_value, value->u.vectorValue, sizeof(std::float_t[3]));
-					return;
-				}
-
-				scr_error(va("Type %s is not a vector", var_typename[value->type]));
-			}
-
-			scr_error(va("Parameter %u does not exist", index + 1));
-		}
-
-		int scr_get_int(unsigned int index)
-		{
-			if (index < game::scr_VmPub->outparamcount)
-			{
-				auto* value = game::scr_VmPub->top - index;
-				if (value->type == game::VAR_INTEGER)
-				{
-					return value->u.intValue;
-				}
-
-				scr_error(va("Type %s is not an int", var_typename[value->type]));
-			}
-
-			scr_error(va("Parameter %u does not exist", index + 1));
-			return 0;
-		}
-
-		float scr_get_float(unsigned int index)
-		{
-			if (index < game::scr_VmPub->outparamcount)
-			{
-				auto* value = game::scr_VmPub->top - index;
-				if (value->type == game::VAR_FLOAT)
-				{
-					return value->u.floatValue;
-				}
-
-				if (value->type == game::VAR_INTEGER)
-				{
-					return static_cast<float>(value->u.intValue);
-				}
-
-				scr_error(va("Type %s is not a float", var_typename[value->type]));
-			}
-
-			scr_error(va("Parameter %u does not exist", index + 1));
-			return 0.0f;
-		}
-
-		int scr_get_pointer_type(unsigned int index)
-		{
-			if (index < game::scr_VmPub->outparamcount)
-			{
-				if ((game::scr_VmPub->top - index)->type == game::VAR_POINTER)
-				{
-					return static_cast<int>(game::GetObjectType((game::scr_VmPub->top - index)->u.uintValue));
-				}
-
-				scr_error(va("Type %s is not an object", var_typename[(game::scr_VmPub->top - index)->type]));
-			}
-
-			scr_error(va("Parameter %u does not exist", index + 1));
-			return 0;
-		}
-
-		int scr_get_type(unsigned int index)
-		{
-			if (index < game::scr_VmPub->outparamcount)
-			{
-				return (game::scr_VmPub->top - index)->type;
-			}
-
-			scr_error(va("Parameter %u does not exist", index + 1));
-			return 0;
-		}
-
-		const char* scr_get_type_name(unsigned int index)
-		{
-			if (index < game::scr_VmPub->outparamcount)
-			{
-				return var_typename[(game::scr_VmPub->top - index)->type];
-			}
-
-			scr_error(va("Parameter %u does not exist", index + 1));
-			return nullptr;
-		}
 	}
 
 	std::optional<std::pair<std::string, std::string>> find_function(const char* pos)
@@ -299,34 +205,130 @@ namespace gsc
 		return {};
 	}
 
+	void scr_get_vector(unsigned int index, float* vector_value)
+	{
+		if (index < game::scr_VmPub->outparamcount)
+		{
+			auto* value = game::scr_VmPub->top - index;
+			if (value->type == game::VAR_VECTOR)
+			{
+				std::memcpy(vector_value, value->u.vectorValue, sizeof(std::float_t[3]));
+				return;
+			}
+
+			scr_error(va("Type %s is not a vector", var_typename[value->type]));
+		}
+
+		scr_error(va("Parameter %u does not exist", index + 1));
+	}
+
+	int scr_get_int(unsigned int index)
+	{
+		if (index < game::scr_VmPub->outparamcount)
+		{
+			auto* value = game::scr_VmPub->top - index;
+			if (value->type == game::VAR_INTEGER)
+			{
+				return value->u.intValue;
+			}
+
+			scr_error(va("Type %s is not an int", var_typename[value->type]));
+		}
+
+		scr_error(va("Parameter %u does not exist", index + 1));
+		return 0;
+	}
+
+	float scr_get_float(unsigned int index)
+	{
+		if (index < game::scr_VmPub->outparamcount)
+		{
+			auto* value = game::scr_VmPub->top - index;
+			if (value->type == game::VAR_FLOAT)
+			{
+				return value->u.floatValue;
+			}
+
+			if (value->type == game::VAR_INTEGER)
+			{
+				return static_cast<float>(value->u.intValue);
+			}
+
+			scr_error(va("Type %s is not a float", var_typename[value->type]));
+		}
+
+		scr_error(va("Parameter %u does not exist", index + 1));
+		return 0.0f;
+	}
+
+	int scr_get_pointer_type(unsigned int index)
+	{
+		if (index < game::scr_VmPub->outparamcount)
+		{
+			if ((game::scr_VmPub->top - index)->type == game::VAR_POINTER)
+			{
+				return static_cast<int>(game::GetObjectType((game::scr_VmPub->top - index)->u.uintValue));
+			}
+
+			scr_error(va("Type %s is not an object", var_typename[(game::scr_VmPub->top - index)->type]));
+		}
+
+		scr_error(va("Parameter %u does not exist", index + 1));
+		return 0;
+	}
+
+	int scr_get_type(unsigned int index)
+	{
+		if (index < game::scr_VmPub->outparamcount)
+		{
+			return (game::scr_VmPub->top - index)->type;
+		}
+
+		scr_error(va("Parameter %u does not exist", index + 1));
+		return 0;
+	}
+
+	const char* scr_get_type_name(unsigned int index)
+	{
+		if (index < game::scr_VmPub->outparamcount)
+		{
+			return var_typename[(game::scr_VmPub->top - index)->type];
+		}
+
+		scr_error(va("Parameter %u does not exist", index + 1));
+		return nullptr;
+	}
+
 	class error final : public component_interface
 	{
 	public:
 		void post_unpack() override
 		{
+			scr_emit_function_hook.create(SELECT_VALUE(0x1403113D0, 0x1403ED900), &scr_emit_function_stub);
+
+			utils::hook::call(SELECT_VALUE(0x140311364, 0x1403ED894), compile_error_stub); // LinkFile
+			utils::hook::call(SELECT_VALUE(0x1403113B8, 0x1403ED8E8), compile_error_stub); // LinkFile
+			utils::hook::call(SELECT_VALUE(0x1403114AA, 0x1403ED9DB), find_variable_stub); // Scr_EmitFunction
+
+			// Restore basic error messages for commonly used scr functions
+			utils::hook::jump(SELECT_VALUE(0x14031BD80, 0x1403F8510), scr_get_const_string);
+			utils::hook::jump(game::Scr_GetInt, scr_get_int);
+			utils::hook::jump(game::Scr_GetFloat, scr_get_float);
+			utils::hook::jump(game::Scr_GetVector, scr_get_vector);
+
+			utils::hook::jump(SELECT_VALUE(0x14031C690, 0x1403F8D70), scr_get_type);
+			utils::hook::jump(SELECT_VALUE(0x14031C700, 0x1403F8DE0), scr_get_type_name);
+
 			if (game::environment::is_sp())
 			{
 				return;
 			}
 
-			scr_emit_function_hook.create(0x1403ED900, &scr_emit_function_stub);
-
-			utils::hook::call(0x1403ED894, compile_error_stub); // LinkFile
-			utils::hook::call(0x1403ED8E8, compile_error_stub); // LinkFile
-			utils::hook::call(0x1403ED9DB, find_variable_stub); // Scr_EmitFunction
-
-			// Restore basic error messages for commonly used scr functions
 			utils::hook::jump(0x1403F8990, scr_get_object);
-			utils::hook::jump(0x1403F8510, scr_get_const_string);
 			utils::hook::jump(0x1403F82F0, scr_get_const_istring);
 			utils::hook::jump(0x140327870, scr_validate_localized_string_ref);
-			utils::hook::jump(0x1403F8EC0, scr_get_vector);
-			utils::hook::jump(0x1403F88D0, scr_get_int);
-			utils::hook::jump(0x1403F8820, scr_get_float);
 
 			utils::hook::jump(0x1403F8BA0, scr_get_pointer_type);
-			utils::hook::jump(0x1403F8D70, scr_get_type);
-			utils::hook::jump(0x1403F8DE0, scr_get_type_name);
 		}
 
 		void pre_destroy() override

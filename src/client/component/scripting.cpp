@@ -49,9 +49,9 @@ namespace scripting
 			}
 		}
 
-		void g_shutdown_game_stub(const int free_scripts)
+		void g_shutdown_game_stub(const int clear_scripts)
 		{
-			if (free_scripts)
+			if (clear_scripts)
 			{
 				script_function_table_sort.clear();
 				script_function_table.clear();
@@ -61,10 +61,10 @@ namespace scripting
 
 			for (const auto& callback : shutdown_callbacks)
 			{
-				callback(free_scripts);
+				callback(clear_scripts);
 			}
 
-			return g_shutdown_game_hook.invoke<void>(free_scripts);
+			return g_shutdown_game_hook.invoke<void>(clear_scripts);
 		}
 
 		void process_script_stub(const char* filename)
@@ -182,10 +182,6 @@ namespace scripting
 			scr_set_thread_position_hook.create(SELECT_VALUE(0x1403115E0, 0x1403EDB10), &scr_set_thread_position_stub);
 			process_script_hook.create(SELECT_VALUE(0x14031AB30, 0x1403F7300), &process_script_stub);
 			sl_get_canonical_string_hook.create(game::SL_GetCanonicalString, &sl_get_canonical_string_stub);
-
-			scheduler::loop([]
-			{
-			}, scheduler::pipeline::server);
 		}
 	};
 }

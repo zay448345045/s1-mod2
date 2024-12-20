@@ -43,6 +43,28 @@ namespace dvars
 	game::dvar_t* com_developer = nullptr;
 	game::dvar_t* com_developer_script = nullptr;
 
+	std::string get_dvar_string(const std::string& dvar)
+	{
+		const auto* dvar_value = game::Dvar_FindVar(dvar.data());
+		if (dvar_value && dvar_value->current.string)
+		{
+			return { dvar_value->current.string };
+		}
+
+		return {};
+	}
+
+	bool get_dvar_bool(const std::string& dvar)
+	{
+		const auto* dvar_value = game::Dvar_FindVar(dvar.data());
+		if (dvar_value && dvar_value->current.enabled)
+		{
+			return dvar_value->current.enabled;
+		}
+
+		return false;
+	}
+
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain)
 	{
 		if (domain.vector.min == -FLT_MAX)
@@ -51,22 +73,16 @@ namespace dvars
 			{
 				return utils::string::va("Domain is any %iD vector", components);
 			}
-			else
-			{
-				return utils::string::va("Domain is any %iD vector with components %g or smaller", components,
-				                         domain.vector.max);
-			}
+
+			return utils::string::va("Domain is any %iD vector with components %g or smaller", components, domain.vector.max);
 		}
-		else if (domain.vector.max == FLT_MAX)
+
+		if (domain.vector.max == FLT_MAX)
 		{
-			return utils::string::va("Domain is any %iD vector with components %g or bigger", components,
-			                         domain.vector.min);
+			return utils::string::va("Domain is any %iD vector with components %g or bigger", components, domain.vector.min);
 		}
-		else
-		{
-			return utils::string::va("Domain is any %iD vector with components from %g to %g", components,
-			                         domain.vector.min, domain.vector.max);
-		}
+
+		return utils::string::va("Domain is any %iD vector with components from %g to %g", components, domain.vector.min, domain.vector.max);
 	}
 
 	std::string dvar_get_domain(const game::dvar_type type, const game::dvar_limits& domain)

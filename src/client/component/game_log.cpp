@@ -81,7 +81,7 @@ namespace game_log
 
 			scheduler::once([]
 			{
-				dvars::g_log = game::Dvar_RegisterString("g_log", "logs/games_mp.log", game::DVAR_FLAG_NONE, "Log file name");
+				dvars::g_log = game::Dvar_RegisterString("g_log", "logs/games_mp.log", game::DVAR_FLAG_NONE);
 			}, scheduler::pipeline::main);
 
 			scripting::on_init([]
@@ -102,9 +102,9 @@ namespace game_log
 				g_log_printf("InitGame\n");
 			});
 
-			scripting::on_shutdown([](int free_scripts)
+			scripting::on_shutdown([](const int clear_scripts) -> void
 			{
-				console::info("==== ShutdownGame (%d) ====\n", free_scripts);
+				console::info("==== ShutdownGame (%d) ====\n", clear_scripts);
 
 				g_log_printf("ShutdownGame:\n");
 				g_log_printf("------------------------------------------------------------\n");

@@ -82,8 +82,8 @@ namespace virtuallobby
 				return;
 			}
 
-			virtualLobby_fov = game::Dvar_RegisterFloat("virtualLobby_fov", 40.0f, 1.0f, 170.0f, game::DVAR_FLAG_SAVED, "Field of view for the virtual lobby");
-			virtualLobby_fovscale = game::Dvar_RegisterFloat("virtualLobby_fovScale", 1.0f, 0.0f, 2.0f, game::DVAR_FLAG_SAVED, "Field of view scaled for the virtual lobby");
+			virtualLobby_fov = game::Dvar_RegisterFloat("virtualLobby_fov", 40.0f, 1.0f, 170.0f, game::DVAR_FLAG_SAVED);
+			virtualLobby_fovscale = game::Dvar_RegisterFloat("virtualLobby_fovScale", 1.0f, 0.0f, 2.0f, game::DVAR_FLAG_SAVED);
 
 			utils::hook::nop(0x1401D5AFB, 16);
 			utils::hook::jump(0x1401D5AFB, get_fov_stub, true);

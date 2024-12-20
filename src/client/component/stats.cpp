@@ -75,9 +75,9 @@ namespace stats
 			else
 			{
 				// unlock all
-				cg_unlock_all_items = game::Dvar_RegisterBool("cg_unlockall_items", false, game::DVAR_FLAG_SAVED, "Unlock items that are level-locked by the player's stats.");
-				cg_unlock_all_loot = game::Dvar_RegisterBool("cg_unlockall_loot", false, game::DVAR_FLAG_SAVED, "Unlock supply drop loot.");
-				game::Dvar_RegisterBool("cg_unlockall_classes", false, game::DVAR_FLAG_SAVED, "Unlock extra class slots.");
+				cg_unlock_all_items = game::Dvar_RegisterBool("cg_unlockall_items", false, game::DVAR_FLAG_SAVED);
+				cg_unlock_all_loot = game::Dvar_RegisterBool("cg_unlockall_loot", false, game::DVAR_FLAG_SAVED);
+				game::Dvar_RegisterBool("cg_unlockall_classes", false, game::DVAR_FLAG_SAVED);
 
 				is_item_locked_hook1.create(0x1403BD790, is_item_locked_stub1); // LiveStorage_IsItemUnlockedFromTable_LocalClient
 				is_item_locked_hook2.create(0x1403BD290, is_item_locked_stub2); // LiveStorage_IsItemUnlockedFromTable

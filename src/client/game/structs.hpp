@@ -60,6 +60,13 @@ namespace game
 		VAR_TOTAL_COUNT = 0x1B,
 	};
 
+	struct ScriptFunctions
+	{
+		int maxSize;
+		int count;
+		int* address;
+	};
+
 	struct VariableStackBuffer
 	{
 		const char* pos;
@@ -214,7 +221,6 @@ namespace game
 		unsigned __int16 childVariableBucket[65536];
 		ChildVariableValue childVariableValue[384000];
 	};
-	// *
 
 	enum Sys_Folder
 	{
@@ -1483,11 +1489,17 @@ namespace game
 			char __pad2[8];
 			int nextSnapshotTime; // 269024
 			char __pad3[544];
-			LiveClientDropType liveDropRequest; //269572
+			LiveClientDropType liveDropRequest; // 269572
 			char __pad4[24];
 			TestClientType testClient; // 269600
 			char __pad5[391700];
 		}; // size = 661304
+
+		static_assert(offsetof(client_t, gentity) == 0x41AB0);
+		static_assert(offsetof(client_t, nextSnapshotTime) == 0x41AE0);
+		static_assert(offsetof(client_t, liveDropRequest) == 0x41D04);
+		static_assert(offsetof(client_t, testClient) == 0x41D20);
+		static_assert(sizeof(client_t) == 0xA1738);
 	}
 
 	namespace sp
