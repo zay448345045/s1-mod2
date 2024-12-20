@@ -181,6 +181,16 @@ namespace gameplay
 			utils::hook::jump(0x1402D6A8C, client_think_real_stub, true);
 			utils::hook::nop(0x1402D6A98, 4); // Nop skipped opcodes
 
+			auto* timescale = game::Dvar_RegisterFloat("timescale", 1.0f, 0.1f, 50.0f, game::DVAR_FLAG_REPLICATED, "Changes Timescale of the game");
+			utils::hook::inject(0x1403CF5B0 + 4, &timescale->current.value); // Com_GetTimeScale
+			utils::hook::inject(0x1403D0BDD + 6, &timescale->current.value); // Com_Restart
+			utils::hook::inject(0x1403D19C5 + 4, &timescale->current.value); // Com_SetSlowMotion
+			utils::hook::inject(0x1403D1A25 + 4, &timescale->current.value); // Com_SetSlowMotion
+			utils::hook::inject(0x1403D1A6B + 4, &timescale->current.value);// Com_SetSlowMotion
+			utils::hook::inject(0x1403D1E2C + 4, &timescale->current.value); // Com_TimeScaleMsec
+			utils::hook::inject(0x1403D219E + 4, &timescale->current.value); // Com_UpdateSlowMotion
+			utils::hook::inject(0x1403D21C8 + 4, &timescale->current.value); //Com_UpdateSlowMotion
+
 			dvars::jump_height = game::Dvar_RegisterFloat("jump_height", 39.0f,
 				0.0f, 1000.0f, game::DVAR_FLAG_REPLICATED, "The maximum height of a player's jump");
 			utils::hook::call(0x1401352FF, jump_start_stub);
