@@ -80,23 +80,25 @@ namespace rcon
 			{
 				const auto client = &game::mp::svs_clients[i];
 
+				if (client->header.state == game::CA_DISCONNECTED)
+				{
+					continue;
+				}
+
 				char clean_name[32]{};
 				strncpy_s(clean_name, client->name, _TRUNCATE);
 				game::I_CleanStr(clean_name);
 
-				if (client->header.state > game::CA_DISCONNECTED)
-				{
-					buffer.append(utils::string::va("%3i %5i %3s %s %32s %16s %21s %5i\n",
-						i,
-						game::G_GetClientScore(i),
-						game::SV_BotIsBot(i) ? "Yes" : "No",
-						(client->header.state == 2) ? "CNCT" : (client->header.state == 1) ? "ZMBI" : utils::string::va("%4i", game::SV_GetClientPing(i)),
-						game::SV_GetGuid(i),
-						clean_name,
-						network::net_adr_to_string(client->header.remoteAddress),
-						client->header.remoteAddress.port)
-					);
-				}
+				buffer.append(utils::string::va("%3i %5i %3s %s %32s %16s %21s %5i\n",
+				                                i,
+				                                game::G_GetClientScore(i),
+				                                game::SV_BotIsBot(i) ? "Yes" : "No",
+				                                (client->header.state == 2) ? "CNCT" : (client->header.state == 1) ? "ZMBI" : utils::string::va("%4i", game::SV_GetClientPing(i)),
+				                                game::SV_GetGuid(i),
+				                                clean_name,
+				                                network::net_adr_to_string(client->header.remoteAddress),
+				                                client->header.remoteAddress.port)
+				);
 			}
 
 			return buffer;

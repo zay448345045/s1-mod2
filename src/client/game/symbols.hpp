@@ -219,6 +219,8 @@ namespace game
 
 	WEAK symbol<void(unsigned __int64 markPos)> LargeLocalResetToMark{0x140369C40, 0x1404B6790};
 
+	WEAK symbol<void(char* dest, const char* src, int destsize)> I_strncpyz{0x1403793B0, 0x1404C9E60};
+
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x14059C5C0, 0x1406FD930};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x14059CD00, 0x1406FE070};
 
