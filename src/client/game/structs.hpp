@@ -2098,4 +2098,25 @@ namespace game
 			HksError m_error;
 		};
 	}
+
+	enum DBAllocFlags : std::int32_t
+	{
+		DB_ZONE_NONE = 0x0,
+		DB_ZONE_COMMON = 0x1,
+		DB_ZONE_UI = 0x2,
+		DB_ZONE_GAME = 0x4,
+		DB_ZONE_LOAD = 0x8,
+		DB_ZONE_DEV = 0x10,
+		DB_ZONE_BASEMAP = 0x20,
+		DB_ZONE_TRANSIENT_POOL = 0x40,
+		DB_ZONE_TRANSIENT_MASK = 0x40,
+		DB_ZONE_CUSTOM = 0x1000 // added for custom zone loading
+	};
+
+	struct XZone
+	{
+		char name[64];
+		char pad_0040[432];
+	};
+	static_assert(sizeof(XZone) == 496);
 }
