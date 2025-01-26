@@ -95,4 +95,12 @@ namespace utils::string
 	std::wstring convert(const std::string& str);
 
 	std::string replace(std::string str, const std::string& from, const std::string& to);
+
+	bool is_numeric(const std::string& text);
+
+	bool find_lower(const std::string& a, const std::string& b);
+
+	bool strstr_lower(const char* a, const char* b);
+
+	void set_clipboard_data(const std::string& text);
 }

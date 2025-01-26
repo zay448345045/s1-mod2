@@ -2119,4 +2119,18 @@ namespace game
 		char pad_0040[432];
 	};
 	static_assert(sizeof(XZone) == 496);
+
+	struct WeaponDef
+	{
+		union
+		{
+			const char* szInternalName;
+			const char* name;
+		};
+	};
+
+	struct XModel
+	{
+		const char* name; // 0
+	};
 }
