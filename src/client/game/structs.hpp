@@ -855,9 +855,10 @@ namespace game
 		int readcount;
 		int bit;
 		int lastEntityRef;
-		netsrc_t targetLocalNetID;
 		int useZlib;
 	};
+
+	static_assert(sizeof(msg_t) == 0x38);
 
 	enum errorParm
 	{
@@ -1416,8 +1417,44 @@ namespace game
 
 	static_assert(sizeof(pml_t) == 0x130);
 
+	struct netProfilePacket_t
+	{
+		int iTime;
+		int iSize;
+		int bFragment;
+	};
+
+	struct netProfileStream_t
+	{
+		netProfilePacket_t packets[60];
+		int iCurrPacket;
+		int iBytesPerSecond;
+		int iLastBPSCalcTime;
+		int iCountedPackets;
+		int iCountedFragments;
+		int iFragmentPercentage;
+		int iLargestPacket;
+		int iSmallestPacket;
+	};
+
+	struct netProfileInfo_t
+	{
+		netProfileStream_t send;
+		netProfileStream_t recieve;
+	};
+
 	namespace mp
 	{
+		enum
+		{
+			CS_FREE = 0x0,
+			CS_ZOMBIE = 0x1,
+			CS_RECONNECTING = 0x2,
+			CS_CONNECTED = 0x3,
+			CS_CLIENTLOADING = 0x4,
+			CS_ACTIVE = 0x5,
+		};
+
 		struct cachedSnapshot_t
 		{
 			int archivedFrame;
@@ -1470,33 +1507,141 @@ namespace game
 		{
 		};
 
+		struct netchan_t
+		{
+			int outgoingSequence;
+			netsrc_t sock;
+			int dropped;
+			int incomingSequence;
+			netadr_s remoteAddress;
+			int fragmentSequence;
+			int fragmentLength;
+			char* fragmentBuffer;
+			int fragmentBufferSize;
+			int unsentFragments;
+			int unsentFragmentStart;
+			int unsentLength;
+			char* unsentBuffer;
+			int unsentBufferSize;
+			netProfileInfo_t prof;
+		};
+
 		struct clientHeader_t
 		{
 			int state;
-			char __pad0[36];
-			netadr_s remoteAddress;
-		}; // size = ?
+			int sendAsActive;
+			int deltaMessage;
+			int rateDelayed;
+			int hasAckedBaselineData;
+			int hugeSnapshotSent;
+			netchan_t netchan;
+			float predictedOrigin[3];
+			int predictedOriginServerTime;
+			int migrationState;
+			unsigned int predictedVehicleSplineId;
+			int predictedVehicleTargetEntity;
+			float predictedVehicleOrigin[3];
+			int predictedVehicleServerTime;
+			int ackedMessage[32];
+			unsigned int ackedMessageCount;
+			int sentMessage[32];
+			int wasKillcam[32];
+			unsigned int sendMessageCount;
+			bool overrideDeltaMessage;
+			int overrideSequenceNumber;
+			int sequenceResume;
+			int isInKillcam;
+		};
+
+		struct svscmd_info_t
+		{
+			int time;
+			int type;
+			char cmd[1024];
+		};
+
+		static_assert(sizeof(svscmd_info_t) == 0x408);
+
+		struct client_net_buffers_t
+		{
+			svscmd_info_t reliableCommandInfo[128];
+			char netchanOutgoingBuffer[131072];
+			char netchanIncomingBuffer[2048];
+		};
+
+		struct usercmd_s
+		{
+			int serverTime;
+			unsigned int buttons;
+			int angles[3];
+			Weapon weapon;
+			Weapon offHand;
+			char forwardmove;
+			char rightmove;
+			unsigned __int16 airburstMarkDistance;
+			__int16 meleeChargeEnt;
+			unsigned __int8 meleeChargeDist;
+			char selectedLoc[2];
+			unsigned __int8 selectedLocAngle;
+			char remoteControlAngles[2];
+			char remoteControlMove[3];
+			unsigned int sightedClientsMask;
+			unsigned __int16 spawnTraceEntIndex;
+			unsigned int sightedSpawnsMask[2];
+			unsigned int partialSightedSpawnsMask[2];
+		};
+
+		static_assert(sizeof(usercmd_s) == 0x44);
 
 		struct client_t
 		{
 			clientHeader_t header;
-			char __pad0[3044];
+			const char* dropReason;
+			char userinfo[0x400];
 			int reliableSequence;
 			int reliableAcknowledge;
-			char __pad1[265864];
+			int reliableSent;
+			int messageAcknowledge;
+			int largeCommandSequence;
+			int gamestateMessageNum;
+			int challenge;
+			client_net_buffers_t netBuf;
+			int cumulThinkTime;
+			int beginCmdIndex;
+			int currCmdIndex;
+			usercmd_s lastUsercmd;
+			usercmd_s cmds[8];
+			int lastClientCommand;
 			gentity_s* gentity; // 268976
-			char name[32]; // 268984
-			char __pad2[8];
+			char name[32];
+			int lastPacketTime;
+			int lastConnectTime;
 			int nextSnapshotTime; // 269024
-			char __pad3[544];
+			char __pad3[532];
+			int pureAuthentic;
+			unsigned int streamSyncWaitBits;
+			unsigned int streamSyncWaitTimeout;
 			LiveClientDropType liveDropRequest; // 269572
 			char __pad4[24];
 			TestClientType testClient; // 269600
 			char __pad5[391700];
 		}; // size = 661304
 
+		static_assert(offsetof(client_t, header.netchan.unsentFragments) == 0x54);
+		static_assert(offsetof(client_t, header.migrationState) == 0x660);
+		static_assert(offsetof(client_t, userinfo) == 0x820);
+		static_assert(offsetof(client_t, reliableSequence) == 0xC20);
+		static_assert(offsetof(client_t, reliableAcknowledge) == 0xC24);
+		static_assert(offsetof(client_t, reliableSent) == 0xC28);
+		static_assert(offsetof(client_t, messageAcknowledge) == 0xC2C);
+		static_assert(offsetof(client_t, largeCommandSequence) == 0xC30);
+		static_assert(offsetof(client_t, lastUsercmd) == 0x41848);
+		static_assert(offsetof(client_t, lastClientCommand) == 0x41AAC);
 		static_assert(offsetof(client_t, gentity) == 0x41AB0);
+		static_assert(offsetof(client_t, name) == 0x41AB8);
+		static_assert(offsetof(client_t, lastPacketTime) == 0x41AD8);
 		static_assert(offsetof(client_t, nextSnapshotTime) == 0x41AE0);
+		static_assert(offsetof(client_t, pureAuthentic) == 0x41CF8);
 		static_assert(offsetof(client_t, liveDropRequest) == 0x41D04);
 		static_assert(offsetof(client_t, testClient) == 0x41D20);
 		static_assert(sizeof(client_t) == 0xA1738);
@@ -1508,7 +1653,9 @@ namespace game
 		{
 			char __pad[56135];
 			int flags; // 56136
-		};
+		}; // Incomplete
+
+		static_assert(offsetof(gclient_s, flags) == 56136);
 
 		struct gentity_s
 		{

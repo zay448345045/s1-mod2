@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 #include "game/game.hpp"
+#include "game/engine/sv_game.hpp"
 #include "game/dvars.hpp"
 
 #include "party.hpp"
@@ -442,7 +443,7 @@ namespace party
 					{
 						scheduler::once([i, reason]
 						{
-							game::SV_KickClientNum(i, reason.data());
+							game::SV_KickClientNum(i, reason.c_str());
 						}, scheduler::pipeline::server);
 					}
 					return;
@@ -456,7 +457,7 @@ namespace party
 
 				scheduler::once([client_num, reason]()
 				{
-					game::SV_KickClientNum(client_num, reason.data());
+					game::SV_KickClientNum(client_num, reason.c_str());
 				}, scheduler::pipeline::server);
 			});
 
@@ -476,9 +477,8 @@ namespace party
 				const auto message = params.join(2);
 				const auto* const name = game::Dvar_FindVar("sv_sayName")->current.string;
 
-				game::SV_GameSendServerCommand(client_num, game::SV_CMD_CAN_IGNORE,
-				                               utils::string::va("%c \"%s: %s\"", 84, name, message.data()));
-				printf("%s -> %i: %s\n", name, client_num, message.data());
+				game::engine::SV_GameSendServerCommand(static_cast<char>(client_num), game::SV_CMD_CAN_IGNORE, utils::string::va("%c \"%s: %s\"", 84, name, message.c_str()));
+				printf("%s -> %i: %s\n", name, client_num, message.c_str());
 			});
 
 			command::add("tellraw", [](const command::params& params)
@@ -491,9 +491,8 @@ namespace party
 				const auto client_num = atoi(params.get(1));
 				const auto message = params.join(2);
 
-				game::SV_GameSendServerCommand(client_num, game::SV_CMD_CAN_IGNORE,
-				                               utils::string::va("%c \"%s\"", 84, message.data()));
-				printf("%i: %s\n", client_num, message.data());
+				game::engine::SV_GameSendServerCommand(static_cast<char>(client_num), game::SV_CMD_CAN_IGNORE, utils::string::va("%c \"%s\"", 84, message.c_str()));
+				printf("%i: %s\n", client_num, message.c_str());
 			});
 
 			command::add("say", [](const command::params& params)
@@ -506,9 +505,8 @@ namespace party
 				const auto message = params.join(1);
 				const auto* const name = game::Dvar_FindVar("sv_sayName")->current.string;
 
-				game::SV_GameSendServerCommand(
-					-1, game::SV_CMD_CAN_IGNORE, utils::string::va("%c \"%s: %s\"", 84, name, message.data()));
-				printf("%s: %s\n", name, message.data());
+				game::engine::SV_GameSendServerCommand(-1, game::SV_CMD_CAN_IGNORE, utils::string::va("%c \"%s: %s\"", 84, name, message.c_str()));
+				printf("%s: %s\n", name, message.c_str());
 			});
 
 			command::add("sayraw", [](const command::params& params)
@@ -520,8 +518,7 @@ namespace party
 
 				const auto message = params.join(1);
 
-				game::SV_GameSendServerCommand(-1, game::SV_CMD_CAN_IGNORE,
-				                               utils::string::va("%c \"%s\"", 84, message.data()));
+				game::engine::SV_GameSendServerCommand(-1, game::SV_CMD_CAN_IGNORE, utils::string::va("%c \"%s\"", 84, message.c_str()));
 				printf("%s\n", message.data());
 			});
 

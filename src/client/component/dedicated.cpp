@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 #include "game/game.hpp"
+#include "game/engine/sv_game.hpp"
 
 #include "console.hpp"
 #include "scheduler.hpp"
@@ -99,8 +100,7 @@ namespace dedicated
 
 			for (const auto& command : queue)
 			{
-				game::Cbuf_AddText(0, command.data());
-				game::Cbuf_AddText(0, "\n");
+				command::execute(command);
 			}
 		}
 
@@ -123,35 +123,9 @@ namespace dedicated
 
 		void kill_server()
 		{
-			for (auto i = 0; i < *game::mp::svs_numclients; ++i)
-			{
-				if (game::mp::svs_clients[i].header.state >= 3)
-				{
-					game::SV_GameSendServerCommand(i, game::SV_CMD_CAN_IGNORE,
-					                               utils::string::va("r \"%s\"", "EXE_ENDOFGAME"));
-				}
-			}
+			game::engine::SV_GameSendServerCommand(-1, game::SV_CMD_CAN_IGNORE, utils::string::va("r \"%s\"", "EXE_ENDOFGAME"));
 
 			com_quit_f_hook.invoke<void>();
-		}
-
-		void sys_error_stub(const char* msg, ...)
-		{
-			char buffer[2048]{};
-
-			va_list ap;
-			va_start(ap, msg);
-
-			vsnprintf_s(buffer, _TRUNCATE, msg, ap);
-
-			va_end(ap);
-
-			scheduler::once([]
-			{
-				command::execute("map_rotate");
-			}, scheduler::main, 3s);
-
-			game::Com_Error(game::ERR_DROP, "%s", buffer);
 		}
 	}
 
@@ -190,8 +164,6 @@ namespace dedicated
 			// Don't allow sv_hostname to be changed by the game
 			dvars::disable::set_string("sv_hostname");
 
-			// Stop crashing from sys_errors
-			utils::hook::jump(0x1404D6260, sys_error_stub);
 
 			// Hook R_SyncGpu
 			utils::hook::jump(0x1405A7630, sync_gpu_stub);

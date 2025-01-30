@@ -1,7 +1,7 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
-
 #include "game/game.hpp"
+#include "game/engine/sv_game.hpp"
 #include "game/dvars.hpp"
 
 #include "console.hpp"
@@ -130,7 +130,7 @@ namespace dvar_cheats
 		const auto* dvar = game::Scr_GetString(0); // grab the original dvar again since it's never stored on stack
 		const auto* command = utils::string::va("q %s \"%s\"", dvar, value);
 
-		game::SV_GameSendServerCommand(entity_num, game::SV_CMD_RELIABLE, command);
+		game::engine::SV_GameSendServerCommand(static_cast<char>(entity_num), game::SV_CMD_RELIABLE, command);
 	}
 
 	const auto player_cmd_set_client_dvar = utils::hook::assemble([](utils::hook::assembler& a)

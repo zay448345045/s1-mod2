@@ -62,7 +62,6 @@ namespace bots
 				return;
 			}
 
-			// SV_BotGetRandomName
 			const auto* const bot_name = game::SV_BotGetRandomName();
 			const auto* bot_ent = game::SV_AddBot(bot_name);
 			if (bot_ent)

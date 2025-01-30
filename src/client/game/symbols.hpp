@@ -184,7 +184,7 @@ namespace game
 	WEAK symbol<void(mp::client_t* client)> SV_DropClient{0, 0x140438A30};
 	WEAK symbol<void(mp::client_t*, const char*, int)> SV_ExecuteClientCommand{0, 0x15121D8E6};
 	WEAK symbol<void(int localClientNum)> SV_FastRestart{0, 0x1404374E0};
-	WEAK symbol<void(int clientNum, svscmd_type type, const char* text)> SV_GameSendServerCommand{0x1403F3A70, 0x14043E120};
+	WEAK symbol<int(mp::client_t* client, const unsigned char* cmd, int cmdSize)> SV_CanReplaceServerCommand{0x0, 0x140441A00};
 	WEAK symbol<const char*(int clientNum)> SV_GetGuid{0, 0x14043E1E0};
 	WEAK symbol<int(int clientNum)> SV_GetClientPing{0, 0x14043E1C0};
 	WEAK symbol<playerState_s*(int num)> SV_GetPlayerstateForClientNum{0x1403F3AB0, 0x14043E260};
@@ -220,6 +220,8 @@ namespace game
 	WEAK symbol<void(unsigned __int64 markPos)> LargeLocalResetToMark{0x140369C40, 0x1404B6790};
 
 	WEAK symbol<void(char* dest, const char* src, int destsize)> I_strncpyz{0x1403793B0, 0x1404C9E60};
+
+	WEAK symbol<void(const char* pszCommand, char* pszBuffer, int iBufferSize)> MSG_WriteReliableCommandToBuffer{0x0, 0x1403E1090};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x14059C5C0, 0x1406FD930};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x14059CD00, 0x1406FE070};

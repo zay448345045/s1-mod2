@@ -1,14 +1,13 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
-
 #include "game/game.hpp"
+#include "game/engine/sv_game.hpp"
 #include "game/dvars.hpp"
 
 #include "command.hpp"
 #include "console.hpp"
-#include "game_console.hpp"
-#include "scheduler.hpp"
 #include "fastfiles.hpp"
+#include "game_console.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
@@ -236,15 +235,13 @@ namespace command
 	{
 		if (!dvars::sv_cheats->current.enabled)
 		{
-			game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-				"f \"Cheats are not enabled on this server\"");
+			game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, "f \"Cheats are not enabled on this server\"");
 			return false;
 		}
 
 		if (ent->health < 1)
 		{
-			game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-				"f \"You must be alive to use this command\"");
+			game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, "f \"You must be alive to use this command\"");
 			return false;
 		}
 
@@ -582,8 +579,7 @@ namespace command
 
 				ent->flags ^= game::FL_GODMODE;
 
-				game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-					utils::string::va("f \"godmode %s\"", (ent->flags & game::FL_GODMODE) ? "^2on" : "^1off"));
+				game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, utils::string::va("f \"godmode %s\"", (ent->flags & game::FL_GODMODE) ? "^2on" : "^1off"));
 			});
 
 			add_sv("demigod", [](game::mp::gentity_s* ent, const params_sv&)
@@ -593,8 +589,7 @@ namespace command
 
 				ent->flags ^= game::FL_DEMI_GODMODE;
 
-				game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-					utils::string::va("f \"demigod mode %s\"", (ent->flags & game::FL_DEMI_GODMODE) ? "^2on" : "^1off"));
+				game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, utils::string::va("f \"demigod mode %s\"", (ent->flags & game::FL_DEMI_GODMODE) ? "^2on" : "^1off"));
 			});
 
 			add_sv("notarget", [](game::mp::gentity_s* ent, const params_sv&)
@@ -604,8 +599,7 @@ namespace command
 
 				ent->flags ^= game::FL_NOTARGET;
 
-				game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-					utils::string::va("f \"notarget %s\"", (ent->flags & game::FL_NOTARGET) ? "^2on" : "^1off"));
+				game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, utils::string::va("f \"notarget %s\"", (ent->flags & game::FL_NOTARGET) ? "^2on" : "^1off"));
 			});
 
 			add_sv("noclip", [](game::mp::gentity_s* ent, const params_sv&)
@@ -615,8 +609,7 @@ namespace command
 
 				ent->client->flags ^= 1;
 
-				game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-					utils::string::va("f \"noclip %s\"", ent->client->flags & 1 ? "^2on" : "^1off"));
+				game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, utils::string::va("f \"noclip %s\"", ent->client->flags & 1 ? "^2on" : "^1off"));
 			});
 
 			add_sv("ufo", [](game::mp::gentity_s* ent, const params_sv&)
@@ -626,8 +619,7 @@ namespace command
 
 				ent->client->flags ^= 2;
 
-				game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-					utils::string::va("f \"ufo %s\"", ent->client->flags & 2 ? "^2on" : "^1off"));
+				game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, utils::string::va("f \"ufo %s\"", ent->client->flags & 2 ? "^2on" : "^1off"));
 			});
 
 			add_sv("give", [](game::mp::gentity_s* ent, const params_sv& params)
@@ -637,8 +629,7 @@ namespace command
 
 				if (params.size() < 2)
 				{
-					game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-						"f \"You did not specify a weapon name\"");
+					game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, "f \"You did not specify a weapon name\"");
 					return;
 				}
 
@@ -661,8 +652,7 @@ namespace command
 
 				if (params.size() < 2)
 				{
-					game::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE,
-						"f \"You did not specify a weapon name\"");
+					game::engine::SV_GameSendServerCommand(ent->s.number, game::SV_CMD_RELIABLE, "f \"You did not specify a weapon name\"");
 					return;
 				}
 

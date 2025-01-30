@@ -96,8 +96,8 @@ namespace rcon
 				                                (client->header.state == 2) ? "CNCT" : (client->header.state == 1) ? "ZMBI" : utils::string::va("%4i", game::SV_GetClientPing(i)),
 				                                game::SV_GetGuid(i),
 				                                clean_name,
-				                                network::net_adr_to_string(client->header.remoteAddress),
-				                                client->header.remoteAddress.port)
+				                                network::net_adr_to_string(client->header.netchan.remoteAddress),
+				                                client->header.netchan.remoteAddress.port)
 				);
 			}
 

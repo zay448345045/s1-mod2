@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 #include "game/game.hpp"
+#include "game/engine/sv_game.hpp"
 #include "game/dvars.hpp"
 
 #include "command.hpp"
@@ -178,7 +179,7 @@ namespace patches
 			const auto client = &game::mp::svs_clients[ent->s.number];
 
 			// 22 => "end_game"
-			if (menu_id == 22 && client->header.remoteAddress.type != game::NA_LOOPBACK)
+			if (menu_id == 22 && client->header.netchan.remoteAddress.type != game::NA_LOOPBACK)
 			{
 				return;
 			}
@@ -239,6 +240,10 @@ namespace patches
 
 		static void patch_mp()
 		{
+			// Bypass Arxan function
+			utils::hook::nop(0x14043E120, 9);
+			utils::hook::jump(0x14043E120, game::engine::SV_GameSendServerCommand);
+
 			// Use name dvar
 			live_get_local_client_name_hook.create(0x1404D47F0, &live_get_local_client_name);
 

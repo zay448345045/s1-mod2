@@ -29,7 +29,7 @@ namespace lui
 			{
 				if (params.size() <= 1)
 				{
-					console::info("usage: lui_open <name>\n");
+					console::info("USAGE: %s <name>\n", params.get(0));
 					return;
 				}
 
@@ -40,7 +40,7 @@ namespace lui
 			{
 				if (params.size() <= 1)
 				{
-					console::info("usage: lui_open_popup <name>\n");
+					console::info("USAGE: %s <name>\n", params.get(0));
 					return;
 				}
 
