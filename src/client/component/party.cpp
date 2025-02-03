@@ -227,64 +227,6 @@ namespace party
 		network::send(target, "getInfo", connect_state.challenge);
 	}
 
-	void start_map(const std::string& mapname)
-	{
-		if (game::Live_SyncOnlineDataFlags(0) > 32)
-		{
-			scheduler::once([=]()
-			{
-				command::execute("map " + mapname, false);
-			}, scheduler::pipeline::main, 1s);
-		}
-		else
-		{
-			if (!game::SV_MapExists(mapname.data()))
-			{
-				console::info("Map '%s' doesn't exist.\n", mapname.data());
-				return;
-			}
-
-			auto* current_mapname = game::Dvar_FindVar("mapname");
-			if (current_mapname && utils::string::to_lower(current_mapname->current.string) ==
-				utils::string::to_lower(mapname) && (game::SV_Loaded() && !game::VirtualLobby_Loaded()))
-			{
-				console::info("Restarting map: %s\n", mapname.data());
-				command::execute("map_restart", false);
-				return;
-			}
-
-			if (!game::environment::is_dedi())
-			{
-				if (game::SV_Loaded())
-				{
-					const auto* args = "Leave";
-					game::UI_RunMenuScript(0, &args);
-				}
-
-				perform_game_initialization();
-			}
-
-			console::info("Starting map: %s\n", mapname.data());
-
-			auto* gametype = game::Dvar_FindVar("g_gametype");
-			if (gametype && gametype->current.string)
-			{
-				command::execute(utils::string::va("ui_gametype %s", gametype->current.string), true);
-			}
-			command::execute(utils::string::va("ui_mapname %s", mapname.data()), true);
-
-			/*auto* maxclients = game::Dvar_FindVar("sv_maxclients");
-			if (maxclients)
-			{
-				command::execute(utils::string::va("ui_maxclients %i", maxclients->current.integer), true);
-				command::execute(utils::string::va("party_maxplayers %i", maxclients->current.integer), true);
-			}*/
-
-			const auto* args = "StartServer";
-			game::UI_RunMenuScript(0, &args);
-		}
-	}
-
 	int server_client_count()
 	{
 		return sv_maxclients;
@@ -314,36 +256,6 @@ namespace party
 			}
 			// enable custom kick reason in GScr_KickPlayer
 			utils::hook::set<uint8_t>(0x14032ED80, 0xEB);
-
-			command::add("map", [](const command::params& argument)
-			{
-				if (argument.size() != 2)
-				{
-					return;
-				}
-
-				start_map(argument[1]);
-			});
-
-			command::add("map_restart", []()
-			{
-				if (!game::SV_Loaded() || game::VirtualLobby_Loaded())
-				{
-					return;
-				}
-				*reinterpret_cast<int*>(0x1488692B0) = 1; // sv_map_restart
-				*reinterpret_cast<int*>(0x1488692B4) = 1; // sv_loadScripts
-				*reinterpret_cast<int*>(0x1488692B8) = 0; // sv_migrate
-				reinterpret_cast<void(*)(int)>(0x140437460)(0); // SV_CheckLoadGame
-			});
-
-			command::add("fast_restart", []()
-			{
-				if (game::SV_Loaded() && !game::VirtualLobby_Loaded())
-				{
-					game::SV_FastRestart(0);
-				}
-			});
 
 			command::add("reconnect", [](const command::params& argument)
 			{

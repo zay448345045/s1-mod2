@@ -20,6 +20,8 @@ namespace patches
 {
 	namespace
 	{
+		utils::hook::detour com_quit_f_hook;
+		utils::hook::detour sv_shutdown_hook;
 		utils::hook::detour live_get_local_client_name_hook;
 
 		const char* live_get_local_client_name()
@@ -186,6 +188,20 @@ namespace patches
 
 			cmd_lui_notify_server_hook.invoke<void>(ent);
 		}
+
+		void sv_shutdown_stub(const char* finalmsg)
+		{
+			console::info("----- Server Shutdown -----\n");
+
+			sv_shutdown_hook.invoke<void>(finalmsg);
+		}
+
+		void com_quit_f_stub()
+		{
+			console::info("quitting...\n");
+
+			com_quit_f_hook.invoke<void>();
+		}
 	}
 
 	class component final : public component_interface
@@ -313,6 +329,9 @@ namespace patches
 
 			// Prevent clients from ending the game as non host by sending 'end_game' lui notification
 			cmd_lui_notify_server_hook.create(0x1402E9390, cmd_lui_notify_server_stub);
+
+			com_quit_f_hook.create(0x1403D08C0, com_quit_f_stub);
+			sv_shutdown_hook.create(0x140440170, sv_shutdown_stub);
 		}
 
 		static void patch_sp()

@@ -3,12 +3,14 @@
 #include "game/game.hpp"
 #include "game/engine/sv_game.hpp"
 
+#include "command.hpp"
 #include "console.hpp"
+#include "dvars.hpp"
+#include "network.hpp"
 #include "scheduler.hpp"
 #include "server_list.hpp"
-#include "network.hpp"
-#include "command.hpp"
-#include "dvars.hpp"
+
+#include "component/gsc/script_extension.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
@@ -17,9 +19,6 @@ namespace dedicated
 {
 	namespace
 	{
-		utils::hook::detour gscr_set_dynamic_dvar_hook;
-		utils::hook::detour com_quit_f_hook;
-
 		const game::dvar_t* sv_lanOnly;
 
 		void init_dedicated_server()
@@ -109,23 +108,53 @@ namespace dedicated
 			std::this_thread::sleep_for(1ms);
 		}
 
-		void gscr_set_dynamic_dvar()
+		void sv_kill_server_f()
 		{
-			auto s = game::Scr_GetString(0);
-			auto* dvar = game::Dvar_FindVar(s);
-			if (dvar && !std::strncmp("scr_", dvar->name, 4))
+			game::Com_Shutdown("EXE_SERVERKILLED");
+		}
+
+		void start_map(const std::string& map_name)
+		{
+			if (game::Live_SyncOnlineDataFlags(0) > 32)
 			{
+				scheduler::once([map_name]()
+				{
+					command::execute(std::format("map {}", map_name), false);
+				}, scheduler::pipeline::main, 1s);
+
 				return;
 			}
 
-			gscr_set_dynamic_dvar_hook.invoke<void>();
+			if (!game::SV_MapExists(map_name.c_str()))
+			{
+				console::info("Map '%s' doesn't exist.\n", map_name.c_str());
+				return;
+			}
+
+			auto* current_mapname = game::Dvar_FindVar("mapname");
+			if (current_mapname && utils::string::to_lower(current_mapname->current.string) == utils::string::to_lower(map_name) && (game::SV_Loaded() && !game::VirtualLobby_Loaded()))
+			{
+				console::info("Restarting map: %s\n", map_name.c_str());
+				command::execute("map_restart", false);
+				return;
+			}
+
+			console::info("Starting map: %s\n", map_name.c_str());
+
+			auto* gametype = game::Dvar_FindVar("g_gametype");
+			if (gametype && gametype->current.string)
+			{
+				command::execute(utils::string::va("ui_gametype %s", gametype->current.string), true);
+			}
+
+			command::execute(utils::string::va("ui_mapname %s", map_name.c_str()), true);
+
+			game::SV_StartMapForParty(0, map_name.c_str(), false, false);
 		}
 
-		void kill_server()
+		void gscr_is_using_match_rules_data_stub()
 		{
-			game::engine::SV_GameSendServerCommand(-1, game::SV_CMD_CAN_IGNORE, utils::string::va("r \"%s\"", "EXE_ENDOFGAME"));
-
-			com_quit_f_hook.invoke<void>();
+			game::Scr_AddInt(0);
 		}
 	}
 
@@ -164,9 +193,11 @@ namespace dedicated
 			// Don't allow sv_hostname to be changed by the game
 			dvars::disable::set_string("sv_hostname");
 
-
 			// Hook R_SyncGpu
 			utils::hook::jump(0x1405A7630, sync_gpu_stub);
+
+			// Make GScr_IsUsingMatchRulesData return 0 so the game doesn't override the cfg
+			gsc::override_function("isusingmatchrulesdata", gscr_is_using_match_rules_data_stub);
 
 			utils::hook::jump(0x14020C6B0, init_dedicated_server);
 
@@ -176,9 +207,6 @@ namespace dedicated
 			// delay console commands until the initialization is done
 			utils::hook::call(0x1403CEC35, execute_console_command);
 			utils::hook::nop(0x1403CEC4B, 5);
-
-			// patch GScr_SetDynamicDvar to behave better
-			gscr_set_dynamic_dvar_hook.create(0x140312D00, &gscr_set_dynamic_dvar);
 
 			utils::hook::nop(0x1404AE6AE, 5); // don't load config file
 			utils::hook::nop(0x1403AF719, 5); // ^
@@ -278,7 +306,7 @@ namespace dedicated
 				console::info("==================================\n");
 
 				// remove disconnect command
-				game::Cmd_RemoveCommand(reinterpret_cast<const char*>(751));
+				game::Cmd_RemoveCommand(751);
 
 				execute_startup_command_queue();
 				execute_console_command_queue();
@@ -289,8 +317,38 @@ namespace dedicated
 				command::add("heartbeat", send_heartbeat);
 			}, scheduler::pipeline::main, 1s);
 
-			command::add("killserver", kill_server);
-			com_quit_f_hook.create(0x1403D08C0, &kill_server);
+			command::add("killserver", sv_kill_server_f);
+
+			command::add("map", [](const command::params& argument)
+			{
+				if (argument.size() != 2)
+				{
+					return;
+				}
+
+				start_map(argument[1]);
+			});
+
+			command::add("map_restart", []()
+			{
+				if (!game::SV_Loaded() || game::VirtualLobby_Loaded())
+				{
+					return;
+				}
+
+				*reinterpret_cast<int*>(0x1488692B0) = 1; // sv_map_restart
+				*reinterpret_cast<int*>(0x1488692B4) = 1; // sv_loadScripts
+				*reinterpret_cast<int*>(0x1488692B8) = 0; // sv_migrate
+				reinterpret_cast<void(*)(int)>(0x140437460)(0); // SV_CheckLoadGame
+			});
+
+			command::add("fast_restart", []()
+			{
+				if (game::SV_Loaded() && !game::VirtualLobby_Loaded())
+				{
+					game::SV_FastRestart(0);
+				}
+			});
 		}
 	};
 }
