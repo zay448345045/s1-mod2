@@ -86,7 +86,7 @@ namespace rcon
 				}
 
 				char clean_name[32]{};
-				strncpy_s(clean_name, client->name, _TRUNCATE);
+				game::I_strncpyz(clean_name, client->name, sizeof(clean_name));
 				game::I_CleanStr(clean_name);
 
 				buffer.append(utils::string::va("%3i %5i %3s %s %32s %16s %21s %5i\n",

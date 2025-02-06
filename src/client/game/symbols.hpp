@@ -30,6 +30,7 @@ namespace game
 	WEAK symbol<void(int index)> Cmd_RemoveCommand{0x1402EE910, 0x1403AFEF0};
 	WEAK symbol<void(const char* text_in)> Cmd_TokenizeString{0x1402EEA30, 0x1403B0020};
 	WEAK symbol<void()> Cmd_EndTokenizeString{0x1402EE000, 0x1403AF5B0};
+	WEAK symbol<int(char* dest, int size, const char* fmt, ...)> Com_sprintf{0x140378E30, 0x1404C97B0};
 
 	WEAK symbol<void(const char* message)> Conbuf_AppendText{0x14038F220, 0x1404D9040};
 
@@ -221,6 +222,7 @@ namespace game
 	WEAK symbol<void(unsigned __int64 markPos)> LargeLocalResetToMark{0x140369C40, 0x1404B6790};
 
 	WEAK symbol<void(char* dest, const char* src, int destsize)> I_strncpyz{0x1403793B0, 0x1404C9E60};
+	WEAK symbol<void(char* dest, int size, const char* src)> I_strncat{0x1403792E0, 0x1404C9D90};
 
 	WEAK symbol<void(const char* pszCommand, char* pszBuffer, int iBufferSize)> MSG_WriteReliableCommandToBuffer{0x0, 0x1403E1090};
 

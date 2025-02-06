@@ -2,7 +2,6 @@
 #include "loader/component_loader.hpp"
 #include "game/game.hpp"
 
-#include "party.hpp"
 #include "console.hpp"
 
 #include <utils/hook.hpp>
@@ -11,49 +10,7 @@ namespace logger
 {
 	namespace
 	{
-		utils::hook::detour com_error_hook;
-
 		game::dvar_t* logger_dev = nullptr;
-
-		void print_error(const char* msg, ...)
-		{
-			char buffer[2048]{};
-			va_list ap;
-
-			va_start(ap, msg);
-			vsnprintf_s(buffer, _TRUNCATE, msg, ap);
-			va_end(ap);
-
-			console::error("%s", buffer);
-		}
-
-		void print_com_error(int, const char* msg, ...)
-		{
-			char buffer[2048]{};
-			va_list ap;
-
-			va_start(ap, msg);
-			vsnprintf_s(buffer, _TRUNCATE, msg, ap);
-			va_end(ap);
-
-			console::error("%s", buffer);
-		}
-
-		void com_error_stub(const int error, const char* msg, ...)
-		{
-			char buffer[2048]{};
-			va_list ap;
-
-			va_start(ap, msg);
-			vsnprintf_s(buffer, _TRUNCATE, msg, ap);
-			va_end(ap);
-
-			console::error("Error: %s\n", buffer);
-
-			party::clear_sv_motd(); // clear sv_motd on error if it exists
-
-			com_error_hook.invoke<void>(error, "%s", buffer);
-		}
 
 		void print_warning(const char* msg, ...)
 		{
@@ -61,7 +18,7 @@ namespace logger
 			va_list ap;
 
 			va_start(ap, msg);
-			vsnprintf_s(buffer, _TRUNCATE, msg, ap);
+			vsnprintf(buffer, sizeof(buffer), msg, ap);
 			va_end(ap);
 
 			console::warn("%s", buffer);
@@ -73,7 +30,7 @@ namespace logger
 			va_list ap;
 
 			va_start(ap, msg);
-			vsnprintf_s(buffer, _TRUNCATE, msg, ap);
+			vsnprintf(buffer, sizeof(buffer), msg, ap);
 			va_end(ap);
 
 			console::info("%s", buffer);
@@ -90,7 +47,7 @@ namespace logger
 			va_list ap;
 
 			va_start(ap, msg);
-			vsnprintf_s(buffer, _TRUNCATE, msg, ap);
+			vsnprintf(buffer, sizeof(buffer), msg, ap);
 			va_end(ap);
 
 			console::info("%s", buffer);
@@ -156,13 +113,6 @@ namespace logger
 				// Make havok script's print function actually print
 				utils::hook::jump(0x140701A1C, print);
 			}
-
-			if (!game::environment::is_sp())
-			{
-				utils::hook::call(0x1404D8543, print_com_error);
-			}
-
-			com_error_hook.create(game::Com_Error, com_error_stub);
 
 			logger_dev = game::Dvar_RegisterBool("logger_dev", false, game::DVAR_FLAG_SAVED);
 		}

@@ -118,7 +118,7 @@ namespace patches
 		char* db_read_raw_file_stub(const char* filename, char* buf, const int size)
 		{
 			std::string file_name = filename;
-			if (file_name.find(".cfg") == std::string::npos)
+			if (!file_name.ends_with(".cfg"))
 			{
 				file_name.append(".cfg");
 			}
@@ -127,6 +127,7 @@ namespace patches
 			if (file.exists())
 			{
 				snprintf(buf, size, "%s\n", file.get_buffer().data());
+				buf[size - 1] = '\0';
 				return buf;
 			}
 
@@ -326,6 +327,9 @@ namespace patches
 			dvars::override::register_int("sv_connectTimeout", 120, 120, 1800, game::DVAR_FLAG_NONE); // 60 - 0 - 1800
 
 			game::Dvar_RegisterInt("scr_game_spectatetype", 1, 0, 99, game::DVAR_FLAG_REPLICATED);
+
+			// Disable Com_Error in NET_SendPacket
+			utils::hook::nop(0x1404D8543, 5);
 
 			// Prevent clients from ending the game as non host by sending 'end_game' lui notification
 			cmd_lui_notify_server_hook.create(0x1402E9390, cmd_lui_notify_server_stub);

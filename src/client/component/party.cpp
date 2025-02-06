@@ -160,7 +160,7 @@ namespace party
 			if (game::mp::g_entities[i].client)
 			{
 				char client_name[16] = {0};
-				strncpy_s(client_name, game::mp::g_entities[i].client->name, sizeof(client_name));
+				game::I_strncpyz(client_name, game::mp::g_entities[i].client->name, sizeof(client_name));
 				game::I_CleanStr(client_name);
 
 				if (client_name == name)

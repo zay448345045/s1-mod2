@@ -84,6 +84,36 @@ namespace security
 
 			ui_replace_directive_hook.invoke<void>(local_client_num, src_string, dst_string, dst_buffer_size);
 		}
+
+		int hud_elem_set_enum_string_stub(char* string, const char* format, ...)
+		{
+			va_list ap;
+			va_start(ap, format);
+			const auto len = vsnprintf(string, 0x800, format, ap);
+			va_end(ap);
+
+			return len;
+		}
+
+		int sv_add_bot_stub(char* string, const char* format, ...)
+		{
+			va_list ap;
+			va_start(ap, format);
+			const auto len = vsnprintf(string, 0x400, format, ap);
+			va_end(ap);
+
+			return len;
+		}
+
+		int sv_add_test_client_stub(char* string, const char* format, ...)
+		{
+			va_list ap;
+			va_start(ap, format);
+			const auto len = vsnprintf(string, 0x400, format, ap);
+			va_end(ap);
+
+			return len;
+		}
 	}
 
 	class component final : public component_interface
@@ -91,10 +121,17 @@ namespace security
 	public:
 		void post_unpack() override
 		{
+			// sprinf
+			utils::hook::call(SELECT_VALUE(0x1402203DF, 0x1402F0BAF), hud_elem_set_enum_string_stub);
+
 			if (game::environment::is_sp()) return;
 
 			// Patch vulnerability in PlayerCards_SetCachedPlayerData
 			utils::hook::call(0x1401BB909, set_cached_playerdata_stub);
+
+			// sprinf
+			utils::hook::call(0x140439075, sv_add_bot_stub);
+			utils::hook::call(0x14043932A, sv_add_test_client_stub);
 
 			// Patch entity overflow
 			utils::hook::jump(0x14044DE3A, assemble(remap_cached_entities_stub), true);

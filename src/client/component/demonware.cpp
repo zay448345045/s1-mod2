@@ -348,15 +348,14 @@ namespace demonware
 				return;
 			}
 
-			char buffer[2048];
+			char buffer[2048]{};
 
 			va_list ap;
 			va_start(ap, msg);
-
-			vsnprintf_s(buffer, _TRUNCATE, msg, ap);
-			printf("%s: %s\n", function, buffer);
-
+			vsnprintf(buffer, sizeof(buffer), msg, ap);
 			va_end(ap);
+
+			printf("%s: %s\n", function, buffer);
 		}
 
 		void startup_dw()

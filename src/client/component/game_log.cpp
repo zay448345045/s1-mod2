@@ -10,7 +10,6 @@
 
 #include "gsc/script_extension.hpp"
 
-#include <utils/hook.hpp>
 #include <utils/io.hpp>
 #include <utils/string.hpp>
 
@@ -23,7 +22,7 @@ namespace game_log
 			char buf[1024]{};
 			std::size_t out_chars = 0;
 
-			for (auto i = 0u; i < game::Scr_GetNumParam(); ++i)
+			for (std::uint32_t i = 0; i < game::Scr_GetNumParam(); ++i)
 			{
 				const auto* value = game::Scr_GetString(i);
 				const auto len = std::strlen(value);
@@ -34,7 +33,7 @@ namespace game_log
 					break;
 				}
 
-				strncat_s(buf, value, _TRUNCATE);
+				game::I_strncat(buf, sizeof(buf), value);
 			}
 
 			g_log_printf("%s", buf);
@@ -53,18 +52,11 @@ namespace game_log
 
 		va_list ap;
 		va_start(ap, fmt);
-
-		vsnprintf_s(buffer, _TRUNCATE, fmt, ap);
-
+		vsnprintf(buffer, sizeof(buffer), fmt, ap);
 		va_end(ap);
 
 		const auto time = *game::level_time / 1000;
-		utils::io::write_file(log, utils::string::va("%3i:%i%i %s",
-			time / 60,
-			time % 60 / 10,
-			time % 60 % 10,
-			buffer
-		), true);
+		utils::io::write_file(log, utils::string::va("%3i:%i%i %s", time / 60, time % 60 / 10, time % 60 % 10, buffer), true);
 	}
 
 	class component final : public component_interface
