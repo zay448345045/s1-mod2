@@ -91,12 +91,10 @@ namespace fastfiles
 			const auto result = db_find_x_asset_header_hook.invoke<game::XAssetHeader>(type, name, allow_create_default);
 			const auto diff = game::Sys_Milliseconds() - start;
 
-#ifdef DEBUG
 			if (type == game::ASSET_TYPE_SCRIPTFILE)
 			{
 				dump_gsc_script(name, result);
 			}
-#endif
 
 			if (diff > 100)
 			{
@@ -109,17 +107,6 @@ namespace fastfiles
 			}
 
 			return result;
-		}
-
-		utils::hook::detour db_link_xasset_entry1_hook;
-		game::XAssetEntry* db_link_xasset_entry1(game::XAssetType type, game::XAssetHeader* header)
-		{
-			if (type == game::ASSET_TYPE_SCRIPTFILE)
-			{
-				dump_gsc_script(header->scriptfile->name, *header);
-			}
-
-			return db_link_xasset_entry1_hook.invoke<game::XAssetEntry*>(type, header);
 		}
 
 		namespace mp
@@ -456,7 +443,6 @@ namespace fastfiles
 			db_try_load_x_file_internal_hook.create(SELECT_VALUE(0x1401816F0, 0x1402741C0), &db_try_load_x_file_internal);
 
 			db_find_x_asset_header_hook.create(game::DB_FindXAssetHeader, db_find_x_asset_header_stub);
-			db_link_xasset_entry1_hook.create(SELECT_VALUE(0x14017F390, 0x1402708F0), db_link_xasset_entry1);
 			dvars::g_dump_scripts = game::Dvar_RegisterBool("g_dumpScripts", false, game::DVAR_FLAG_NONE);
 
 			command::add("loadzone", [](const command::params& params)
