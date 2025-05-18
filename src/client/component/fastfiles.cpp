@@ -314,6 +314,37 @@ namespace fastfiles
 
 			db_level_load_add_zone_hook.invoke<void>(load, name, alloc_flags, size_est);
 ;		}
+
+		void db_find_aipaths_stub(game::XAssetType type, const char* name, int allow_create_default)
+		{
+			if (game::DB_XAssetExists(type, name))
+			{
+				game::DB_FindXAssetHeader(type, name, allow_create_default);
+			}
+			else
+			{
+				console::warn("No aipaths found for this map\n");
+			}
+		}
+
+		int format_bsp_name(char* filename, int size, const char* mapname)
+		{
+			std::string name = mapname;
+			auto fmt = "maps/%s.d3dbsp";
+			if (name.starts_with("mp_"))
+			{
+				fmt = "maps/mp/%s.d3dbsp";
+			}
+
+			return game::Com_sprintf(filename, size, fmt, mapname);
+		}
+
+		void get_bsp_filename_stub(char* filename, int size, const char* mapname)
+		{
+			auto base_mapname = mapname;
+			game::Com_IsAddonMap(mapname, &base_mapname);
+			format_bsp_name(filename, size, base_mapname);
+		}
 	}
 
 	std::string get_current_fastfile()
@@ -491,6 +522,22 @@ namespace fastfiles
 
 				// dont load localized zone for custom maps (proper patch for this is here: https://github.com/auroramod/h1-mod/blob/develop/src/client/component/fastfiles.cpp#L442)
 				db_level_load_add_zone_hook.create(0x1402705C0, db_level_load_add_zone_stub);
+			}
+
+			if (game::environment::is_mp())
+			{
+				// Allow loading sp maps on mp
+				utils::hook::jump(0x1404ACE70, get_bsp_filename_stub);
+			}
+			else if (game::environment::is_sp())
+			{
+				// TODO: needs S1 singleplayer addresses
+				/*
+				// Allow loading mp maps
+				utils::hook::set(0x40AF90_b, 0xC300B0);
+				// Don't sys_error if aipaths are missing
+				utils::hook::call(0x2F8EE9_b, db_find_aipaths_stub);
+				*/
 			}
 
 			// Allow loading of mixed compressor types
