@@ -137,21 +137,6 @@ namespace fastfiles
 			db_find_x_asset_header_hook.create(game::DB_FindXAssetHeader, db_find_x_asset_header_stub);
 			dvars::g_dump_scripts = game::Dvar_RegisterBool("g_dumpScripts", false, game::DVAR_FLAG_NONE);
 
-			command::add("loadzone", [](const command::params& params)
-			{
-				if (params.size() < 2)
-				{
-					console::info("usage: loadzone <zone>\n");
-					return;
-				}
-
-				game::XZoneInfo info{};
-				info.name = params.get(1);
-				info.allocFlags = 1;
-				info.freeFlags = 0;
-				game::DB_LoadXAssets(&info, 1u, game::DBSyncMode::DB_LOAD_SYNC);
-			});
-
 			command::add("g_poolSizes", []()
 			{
 				for (auto i = 0; i < game::ASSET_TYPE_COUNT; i++)

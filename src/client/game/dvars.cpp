@@ -36,12 +36,12 @@ namespace dvars
 
 	game::dvar_t* r_fullbright = nullptr;
 
-	game::dvar_t* cg_legacyCrashHandling = nullptr;
-
 	game::dvar_t* sv_cheats = nullptr;
 
 	game::dvar_t* com_developer = nullptr;
 	game::dvar_t* com_developer_script = nullptr;
+
+	game::dvar_t** fs_gameDirVar = nullptr;
 
 	std::string get_dvar_string(const std::string& dvar)
 	{

@@ -25,6 +25,14 @@ namespace game
 	typedef void(*BuiltinMethod)(scr_entref_t);
 	typedef void(*BuiltinFunction)();
 
+	enum ControllerIndex_t
+	{
+		INVALID_CONTROLLER_PORT = -1,
+		CONTROLLER_INDEX_0 = 0x0,
+		CONTROLLER_INDEX_FIRST = 0x0,
+		CONTROLLER_INDEX_COUNT = 0x1,
+	};
+
 	enum
 	{
 		VAR_UNDEFINED = 0x0,
@@ -905,6 +913,7 @@ namespace game
 		DVAR_FLAG_LATCHED = 0x2,
 		DVAR_FLAG_CHEAT = 0x4,
 		DVAR_FLAG_REPLICATED = 0x8,
+		DVAR_FLAG_SERVERINFO = 0x400,
 		DVAR_FLAG_WRITE = 0x800,
 		DVAR_FLAG_READ = 0x2000,
 	};
@@ -923,7 +932,7 @@ namespace game
 		rgb = 9 // Color without alpha
 	};
 
-	union dvar_value
+	union DvarValue
 	{
 		bool enabled;
 		int integer;
@@ -966,9 +975,9 @@ namespace game
 		unsigned int flags;
 		dvar_type type;
 		bool modified;
-		dvar_value current;
-		dvar_value latched;
-		dvar_value reset;
+		DvarValue current;
+		DvarValue latched;
+		DvarValue reset;
 		dvar_limits domain;
 	};
 
@@ -1319,6 +1328,15 @@ namespace game
 		const char *name;
 	};
 
+	struct WeaponDef
+	{};
+
+	struct WeaponCompleteDef
+	{
+		const char* szInternalName;
+		WeaponDef* weapDef;
+	}; // Incomplete
+
 	union XAssetHeader
 	{
 		void* data;
@@ -1441,6 +1459,31 @@ namespace game
 	{
 		netProfileStream_t send;
 		netProfileStream_t recieve;
+	};
+
+	enum
+	{
+		DB_ZONE_COMMON = 0x1,
+		DB_ZONE_UI = 0x2,
+		DB_ZONE_GAME = 0x4,
+		DB_ZONE_LOAD = 0x8,
+		DB_ZONE_DEV = 0x10,
+		DB_ZONE_BASEMAP = 0x20,
+		DB_ZONE_TRANSIENT_POOL = 0x40,
+		DB_ZONE_TRANSIENT_MASK = 0x40,
+		DB_ZONE_CUSTOM = 0x80,
+	};
+
+	enum FF_DIR
+	{
+		FFD_DEFAULT = 0x0,
+		FFD_MOD_DIR = 0x1,
+		FFD_USER_MAP = 0x2,
+	};
+
+	struct Sys_File
+	{
+		HANDLE handle;
 	};
 
 	namespace mp

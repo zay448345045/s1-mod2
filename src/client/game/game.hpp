@@ -66,6 +66,8 @@ namespace game
 
 	[[nodiscard]] bool VirtualLobby_Loaded();
 
+	[[nodiscard]] HANDLE Sys_OpenFileReliable(const char* filename);
+
 	[[nodiscard]] bool is_headless();
 	void show_error(const std::string& text, const std::string& title = "Error");
 }

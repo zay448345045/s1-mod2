@@ -60,6 +60,7 @@ namespace game
 	WEAK symbol<int(const RawFile* rawfile)> DB_GetRawFileLen{0x14017E890, 0x14026FCC0};
 	WEAK symbol<void(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x14017E750, 0x14026FB90};
 	WEAK symbol<char*(const char* filename, char* buf, int size)> DB_ReadRawFile{0x140180E30, 0x140273080};
+	WEAK symbol<int(XAssetType type, void** assets, int maxCount)> DB_GetAllXAssetOfType_FastFile{0x0, 0x14026F970};
 
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140370860, 0x1404BF8B0};
 	WEAK symbol<void(const dvar_t* dvar)> Dvar_ClearModified{0x140370700, 0x1404BF690};
@@ -70,7 +71,7 @@ namespace game
 	WEAK symbol<void(const dvar_t* dvar, const char* string)> Dvar_SetString{0x140373DE0, 0x1404C3610};
 	WEAK symbol<void(const dvar_t* dvar, bool value)> Dvar_SetBool{0x0, 0x1404C1F30};
 	WEAK symbol<void(const char*, const char*, DvarSetSource)> Dvar_SetFromStringByNameFromSource{0x1403737D0, 0x1404C2E40};
-	WEAK symbol<const char*(dvar_t* dvar, dvar_value value)> Dvar_ValueToString{0x140374E10, 0x1404C47B0};
+	WEAK symbol<const char*(dvar_t* dvar, DvarValue value)> Dvar_ValueToString{0x140374E10, 0x1404C47B0};
 
 	WEAK symbol<dvar_t*(const char* dvarName, bool value, unsigned int flags)> Dvar_RegisterBool{0x140371850, 0x1404C0BE0};
 	WEAK symbol<dvar_t*(const char* dvarName, const char** valueList, int defaultIndex, unsigned int flags)> Dvar_RegisterEnum{0x140371B30, 0x1404C0EC0};
@@ -98,13 +99,13 @@ namespace game
 	WEAK symbol<unsigned int(unsigned int, unsigned int)> GetVariable{0x0, 0x1403F3730};
 
 	WEAK symbol<void()> G_Glass_Update{0x14021D540, 0x1402EDEE0};
-
 	WEAK symbol<int(int clientNum)> G_GetClientScore{0, 0x1402F6AB0};
 	WEAK symbol<unsigned int(const char* name)> G_GetWeaponForName{0x140274590, 0x14033FF60};
 	WEAK symbol<int(playerState_s* ps, unsigned int weapon, int dualWield, int startInAltMode, int, int, int, char)> G_GivePlayerWeapon{0x1402749B0, 0x140340470};
 	WEAK symbol<void(playerState_s* ps, unsigned int weapon, int hadWeapon)> G_InitializeAmmo{0x1402217F0, 0x1402F22B0};
 	WEAK symbol<void(int clientNum, unsigned int weapon)> G_SelectWeapon{0x140275380, 0x140340D50};
 	WEAK symbol<int(playerState_s* ps, unsigned int weapon)> G_TakePlayerWeapon{0x1402754E0, 0x1403411D0};
+	WEAK symbol<void()> G_SetupLevelWeaponDef{0x0, 0x140340DE0};
 
 	WEAK symbol<char*(char* string)> I_CleanStr{0x140379010, 0x1404C99A0};
 
@@ -113,6 +114,7 @@ namespace game
 	WEAK symbol<const char*(int, int, int)> Key_KeynumToString{0x14013F380, 0x140207C50};
 
 	WEAK symbol<unsigned int(int)> Live_SyncOnlineDataFlags{0x1404459A0, 0x140562830};
+	WEAK symbol<void(int localControllerIndex)> LiveStorage_StatsWriteNotNeeded{0x1402F51F0, 0x1403C3CD0};
 
 	WEAK symbol<void(int localClientNum, const char* menuName, int isPopup, int isModal, unsigned int isExclusive)> LUI_OpenMenu{0, 0x14048E450};
 	WEAK symbol<void()> LUI_EnterCriticalSection{0, 0x1400D2B10};
@@ -225,6 +227,8 @@ namespace game
 	WEAK symbol<void(char* dest, int size, const char* src)> I_strncat{0x1403792E0, 0x1404C9D90};
 
 	WEAK symbol<void(const char* pszCommand, char* pszBuffer, int iBufferSize)> MSG_WriteReliableCommandToBuffer{0x0, 0x1403E1090};
+
+	WEAK symbol<int(const char* s0, const char* s1, int n)> I_strnicmp{0x1403793E0, 0x1404C9E90};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x14059C5C0, 0x1406FD930};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x14059CD00, 0x1406FE070};
