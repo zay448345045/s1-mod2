@@ -16,7 +16,7 @@ namespace mods
 	{
 		utils::hook::detour sys_create_file_hook;
 
-		void db_build_os_path_from_source(const char* zone_name, game::FF_DIR source, int size, char* filename)
+		void db_build_os_path_from_source(const char* zone_name, const game::FF_DIR source, const int size, char* filename)
 		{
 			char user_map[MAX_PATH]{};
 
@@ -201,7 +201,7 @@ namespace mods
 
 				if (!mod_name.empty() && !mod_name.starts_with("mods/"))
 				{
-					mod_name = "mods/" + mod_name;
+					mod_name.insert(0, "mods/");
 				}
 
 				// change fs_game if needed

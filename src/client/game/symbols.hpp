@@ -269,6 +269,7 @@ namespace game
 	WEAK symbol<XAssetEntry> g_assetEntryPool{0x142CC2400, 0x14379F100};
 	WEAK symbol<int> g_poolSize{0x140804140, 0x1409B4B90};
 	WEAK symbol<const char*> g_assetNames{0x140803C90, 0x1409B3180};
+	WEAK symbol<int> g_compressor{0x141598580, 0x141E0B080};
 
 	WEAK symbol<DWORD> threadIds{0x149632EC0, 0x147DCEA30};
 

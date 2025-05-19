@@ -1471,7 +1471,7 @@ namespace game
 		DB_ZONE_BASEMAP = 0x20,
 		DB_ZONE_TRANSIENT_POOL = 0x40,
 		DB_ZONE_TRANSIENT_MASK = 0x40,
-		DB_ZONE_CUSTOM = 0x80,
+		DB_ZONE_CUSTOM = 0x1000,
 	};
 
 	enum FF_DIR
@@ -1484,6 +1484,15 @@ namespace game
 	struct Sys_File
 	{
 		HANDLE handle;
+	};
+
+	enum DB_CompressorType
+	{
+		DB_COMPRESSOR_INVALID = 0x0,
+		DB_COMPRESSOR_ZLIB = 0x1,
+		DB_COMPRESSOR_UNK2 = 0x2,
+		DB_COMPRESSOR_PASSTHROUGH = 0x3,
+		DB_COMPRESSOR_LZX = 0x4,
 	};
 
 	namespace mp

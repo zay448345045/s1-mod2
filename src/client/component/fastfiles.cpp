@@ -18,6 +18,14 @@ namespace fastfiles
 	{
 		utils::hook::detour db_try_load_x_file_internal_hook;
 		utils::hook::detour db_find_x_asset_header_hook;
+		utils::hook::detour db_read_stream_file_hook;
+
+		int db_read_stream_file_stub(int allow_abort, int finish)
+		{
+			// always use lz4 compressor type when reading stream files
+			*game::g_compressor = game::DB_COMPRESSOR_LZX;
+			return db_read_stream_file_hook.invoke<int>(allow_abort, finish);
+		}
 
 		void db_try_load_x_file_internal(const char* zone_name, const int flags)
 		{
@@ -145,6 +153,9 @@ namespace fastfiles
 				}
 			});
 
+			// Allow loading of mixed compressor types
+			utils::hook::nop(SELECT_VALUE(0x1401536D7, 0x140242DF7), 2);
+
 			reallocate_asset_pool<game::ASSET_TYPE_FONT, 48>();
 
 			if (!game::environment::is_sp())
@@ -155,6 +166,9 @@ namespace fastfiles
 				utils::hook::inject(0x14026FFAC, xmodel_pool + 8);
 				utils::hook::inject(0x14027463C, xmodel_pool + 8);
 				utils::hook::inject(0x140274689, xmodel_pool + 8);
+
+				// Fix compressor type on streamed file load
+				db_read_stream_file_hook.create(0x14027AA70, db_read_stream_file_stub);
 			}
 		}
 	};
