@@ -163,17 +163,6 @@ namespace patches
 			}
 		}
 
-		void set_client_dvar_from_server_stub(void* a1, void* a2, const char* dvar, const char* value)
-		{
-			if (utils::string::to_lower(dvar) == "cg_fov")
-			{
-				return;
-			}
-
-			// CG_SetClientDvarFromServer
-			reinterpret_cast<void(*)(void*, void*, const char*, const char*)>(0x1401BF0A0)(a1, a2, dvar, value);
-		}
-
 		utils::hook::detour cmd_lui_notify_server_hook;
 		void cmd_lui_notify_server_stub(game::mp::gentity_s* ent)
 		{
@@ -298,9 +287,8 @@ namespace patches
 			utils::hook::inject(0x1404398B2, VERSION);
 
 			// prevent servers overriding our fov
-			utils::hook::call(0x1401BB782, set_client_dvar_from_server_stub);
 			utils::hook::nop(0x1403D1195, 5);
-			utils::hook::nop(0x1400FAE36, 5);
+			utils::hook::nop(0x1400FAE36, 5); // Dvar_SetFloat inside LUI_CoD_LuaCall_StopFollow (function doesn't exist on dev builds)
 			utils::hook::set<uint8_t>(0x14019B9B9, 0xEB);
 
 			// some anti tamper thing that kills performance
