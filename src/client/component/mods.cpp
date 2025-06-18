@@ -189,6 +189,9 @@ namespace mods
 			// Load mod.ff
 			utils::hook::call(0x1405A562A, db_load_x_assets_stub); // R_LoadGraphicsAssets According to myself but I don't remember where I got it from
 
+			// Allow loading of unsigned fastfiles
+			utils::hook::nop(0x1402427A5, 2); // DB_InflateInit
+
 			command::add("loadmod", [](const command::params& params) -> void
 			{
 				if (params.size() != 2)
