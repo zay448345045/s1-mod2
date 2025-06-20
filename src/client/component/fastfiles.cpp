@@ -169,6 +169,9 @@ namespace fastfiles
 
 				// Fix compressor type on streamed file load
 				db_read_stream_file_hook.create(0x14027AA70, db_read_stream_file_stub);
+
+				// Allow loading of unsigned fastfiles
+				utils::hook::nop(0x1402427A5, 2); // DB_InflateInit
 			}
 		}
 	};
