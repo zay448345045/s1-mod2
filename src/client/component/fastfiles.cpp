@@ -6,9 +6,9 @@
 #include "command.hpp"
 #include "console.hpp"
 
+#include <utils/concurrency.hpp>
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
-#include <utils/concurrency.hpp>
 
 namespace fastfiles
 {
@@ -115,7 +115,7 @@ namespace fastfiles
 	char* reallocate_asset_pool()
 	{
 		constexpr auto element_size = get_asset_type_size(Type);
-		static char new_pool[element_size * Size] = {0};
+		static char new_pool[element_size * Size]{0};
 		assert(get_asset_type_size(Type) == game::DB_GetXAssetTypeSize(Type));
 
 		std::memmove(new_pool, game::DB_XAssetPool[Type], game::g_poolSize[Type] * element_size);
@@ -166,6 +166,21 @@ namespace fastfiles
 				utils::hook::inject(0x14026FFAC, xmodel_pool + 8);
 				utils::hook::inject(0x14027463C, xmodel_pool + 8);
 				utils::hook::inject(0x140274689, xmodel_pool + 8);
+
+				reallocate_asset_pool<game::ASSET_TYPE_LUA_FILE, 768>();
+				reallocate_asset_pool<game::ASSET_TYPE_WEAPON, 1400>();
+				reallocate_asset_pool<game::ASSET_TYPE_LOCALIZE_ENTRY, 27200>();
+				reallocate_asset_pool<game::ASSET_TYPE_XANIMPARTS, 11600>();
+				reallocate_asset_pool<game::ASSET_TYPE_ATTACHMENT, 256>();
+				reallocate_asset_pool<game::ASSET_TYPE_FONT, 96>();
+				reallocate_asset_pool<game::ASSET_TYPE_SNDDRIVER_GLOBALS, 4>();
+				reallocate_asset_pool<game::ASSET_TYPE_EQUIPMENT_SND_TABLE, 4>();
+				reallocate_asset_pool<game::ASSET_TYPE_SOUND, 32000>();
+				reallocate_asset_pool<game::ASSET_TYPE_LOADED_SOUND, 14000>();
+				reallocate_asset_pool<game::ASSET_TYPE_VERTEXDECL, 3072>();
+				reallocate_asset_pool<game::ASSET_TYPE_COMPUTESHADER, 1024>();
+				reallocate_asset_pool<game::ASSET_TYPE_REVERB_PRESET, 128>();
+				reallocate_asset_pool<game::ASSET_TYPE_IMPACT_FX, 40>();
 
 				// Fix compressor type on streamed file load
 				db_read_stream_file_hook.create(0x14027AA70, db_read_stream_file_stub);
