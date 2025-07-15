@@ -166,7 +166,10 @@ namespace fastfiles
 				utils::hook::inject(0x14026FFAC, xmodel_pool + 8);
 				utils::hook::inject(0x14027463C, xmodel_pool + 8);
 				utils::hook::inject(0x140274689, xmodel_pool + 8);
-
+				// Reallocate asset pools
+				// Disabled because it causes a crash in the main menu once you rejoin a server after
+				// disconnecting and map rotating.
+#if 0
 				reallocate_asset_pool<game::ASSET_TYPE_LUA_FILE, 768>();
 				reallocate_asset_pool<game::ASSET_TYPE_WEAPON, 1400>();
 				reallocate_asset_pool<game::ASSET_TYPE_LOCALIZE_ENTRY, 27200>();
@@ -181,7 +184,7 @@ namespace fastfiles
 				reallocate_asset_pool<game::ASSET_TYPE_COMPUTESHADER, 1024>();
 				reallocate_asset_pool<game::ASSET_TYPE_REVERB_PRESET, 128>();
 				reallocate_asset_pool<game::ASSET_TYPE_IMPACT_FX, 40>();
-
+#endif
 				// Fix compressor type on streamed file load
 				db_read_stream_file_hook.create(0x14027AA70, db_read_stream_file_stub);
 
