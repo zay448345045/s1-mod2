@@ -117,7 +117,7 @@ namespace demonware
 		{
 			hostent* WINAPI gethostbyname_stub(const char* name)
 			{
-#ifdef DEBUG
+#ifdef DW_DEBUG
 				printf("[ network ]: [gethostbyname]: \"%s\"\n", name);
 #endif
 

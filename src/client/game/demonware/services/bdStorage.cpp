@@ -75,7 +75,7 @@ namespace demonware
 			}
 		}
 
-#ifdef DEBUG
+#ifdef DW_DEBUG
 		printf("[DW]: [bdStorage]: missing publisher file: %s\n", name.data());
 #endif
 
@@ -118,7 +118,7 @@ namespace demonware
 		std::string filename;
 		buffer->read_string(&filename);
 
-#ifdef DEBUG
+#ifdef DW_DEBUG
 		printf("[DW]: [bdStorage]: loading publisher file: %s\n", filename.data());
 #endif
 
@@ -126,7 +126,7 @@ namespace demonware
 
 		if (this->load_publisher_resource(filename, data))
 		{
-#ifdef DEBUG
+#ifdef DW_DEBUG
 			printf("[DW]: [bdStorage]: sending publisher file: %s, size: %lld\n", filename.data(), data.size());
 #endif
 
@@ -185,7 +185,7 @@ namespace demonware
 		buffer->read_uint64(&owner);
 		buffer->read_string(&platform);
 
-#ifdef DEBUG
+#ifdef DW_DEBUG
 		printf("[DW]: [bdStorage]: user file: %s, %s, %s\n", game.data(), filename.data(), platform.data());
 #endif
 
