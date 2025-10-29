@@ -1,0 +1,106 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+#name: MSBuild
+
+#on:
+#  push:
+#    branches: [ "master" ]
+#  pull_request:
+#    branches: [ "master" ]
+
+#env:
+  # Path to the solution file relative to the root of the project.
+#  SOLUTION_FILE_PATH: .
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+#  BUILD_CONFIGURATION: Release
+
+#permissions:
+#  contents: read
+
+#jobs:
+#  build:
+#    runs-on: windows-latest
+
+#    steps:
+#    - uses: actions/checkout@v4
+
+#    - name: Add MSBuild to PATH
+#      uses: microsoft/setup-msbuild@v1.0.2
+
+#    - name: Restore NuGet packages
+#      working-directory: ${{env.GITHUB_WORKSPACE}}
+#      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+#    - name: Build
+#      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+#      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+
+
+name: CI Build for S1-Mod
+
+# 在 push 和手动触发时运行  main, 
+on:
+  push:
+    branches: [ "master" ] 
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    # 使用最新的 Windows Runner
+    runs-on: windows-latest
+    
+    steps:
+    - name: 检出代码并更新子模块 (Checkout & Submodules)
+      uses: actions/checkout@v5
+      with:
+        submodules: true # 确保拉取依赖的子模块
+        
+    - name: 🛠️ 设置 Premake5 (Setup Premake5)
+      # 使用 GitHub Action 自动下载并设置 Premake5 到 PATH
+      uses: abel0b/setup-premake@v2
+      with:
+        # 您可以指定 Premake5 的版本，例如 '5.0.0-beta2'
+        # 如果不指定，它会尝试获取最新版本
+        version: '5.0.0-beta2' 
+        
+    - name: ⚙️ 运行 Premake5 生成 Visual Studio 解决方案
+      # 使用项目 README 中指定的生成器
+      run: premake5 vs2022
+        
+    - name: 🔨 使用 MSBuild 编译项目 (Build Project)
+      # 使用 MSBuild 编译生成的解决方案文件，确保使用 Release/x64 配置
+      # windows-latest 运行器默认安装了 MSBuild
+      run: |
+        msbuild build\s1-mod.sln /p:Configuration=Release /p:Platform=x64 /m
+        
+    - name: 📁 查找编译产物路径 (Set Artifact Path)
+      # ⚠️ 关键步骤：请根据您的 Premake5 配置调整路径！
+      # 假设编译结果在 build\Bin\x64\Release\s1-mod.exe
+      id: set_path
+      run: |
+        $BinaryDir = "build\Bin\x64\Release"
+        $ExeFile = "$BinaryDir\s1-mod.exe"
+        
+        # 验证文件是否存在 (可选但推荐)
+        if (-not (Test-Path $ExeFile)) {
+            Write-Host "错误: 编译产物未找到在 $ExeFile"
+            exit 1
+        }
+        echo "BINARY_PATH=$ExeFile" >> $env:GITHUB_ENV
+
+    - name: ⬆️ 上传编译产物为 Artifact (Upload Artifact)
+      uses: actions/upload-artifact@v4
+      with:
+        name: s1-mod-windows-x64-release # Artifact 名称
+        path: ${{ env.BINARY_PATH }}      # 编译好的文件路径
+        retention-days: 7                 # Artifact 保留 7 天
+
